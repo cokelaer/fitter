@@ -1,0 +1,27 @@
+Metadata-Version: 1.1
+Name: fitter
+Version: 0.1.0
+Summary: A tool to fit data to many distributions and best one(s)
+Home-page: ['http://packages.python.org/easydev/']
+Author: Thomas Cokelaer
+Author-email: cokelaer@gmail.com
+License: GPL
+Download-URL: ['http://pypi.python.org/pypi/easydev']
+Description: UNKNOWN
+Keywords: fit,distribution,fitting,scipy
+Platform: Linux
+Platform: Unix
+Platform: MacOsX
+Platform: Windows
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires: sphinx
+Requires: numpy
+Requires: matplotlib
+Requires: scipy
+Requires: pandas

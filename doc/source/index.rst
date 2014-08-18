@@ -57,3 +57,4 @@ Reference Guide
 
     references
 
+    README.rst

@@ -10,7 +10,7 @@ FITTER documentation
 .. image:: https://pypip.in/d/fitter/badge.png
     :target: https://crate.io/packages/fitter/
 
-.. .. image:: https://secure.travis-ci.org/cokelaer/fitter.png
+.. image:: https://secure.travis-ci.org/cokelaer/fitter.png
     :target: http://travis-ci.org/cokelaer/fitter
 
 .. .. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
@@ -58,15 +58,14 @@ Now, the question without any knowledge about the distribution of its parameter,
     # make take some time since by default, all distribution are tried
     f.summary()
 
-.. plot::
-    :width: 80%
 
-    from scipy import stats
-    stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
-    from fitter import Fitter
-    f = Fitter(data)
-    f.fit()
-    f.summary()
+.. image:: http://pythonhosted.org/fitter/_images/index-1_00.png
+    :target: http://pythonhosted.org/fitter/_images/index-1_00.png
+
+
+
+See the `online <http://pythonhosted.org/fitter/>`_ documentation for details.
+
 
 
 

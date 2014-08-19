@@ -192,7 +192,7 @@ class Fitter(object):
 
         self.df_errors = pd.DataFrame({'sumsquare_error':self._fitted_errors})
 
-    def plot_pdf(self, names=None, Nbest=5):
+    def plot_pdf(self, names=None, Nbest=5, lw=2):
         """Plots Probability density functions of the distributions
 
         :param str,list names: names can be a single distribution name, or a list 
@@ -206,23 +206,23 @@ class Fitter(object):
             Nbest = len(self.distributions)
         if isinstance(names, list):
             for name in names:
-                pylab.plot(self.x, self.fitted_pdf[name], lw=2, label=name)
+                pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         elif names:
-            pylab.plot(self.x, self.fitted_pdf[name], lw=2, label=name)
+            pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         else:
             names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
             for name in names:
-                pylab.plot(self.x, self.fitted_pdf[name], lw=2, label=name)
+                pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         pylab.grid(True)
         pylab.legend()
 
-    def summary(self, Nbest=5):
+    def summary(self, Nbest=5, lw=2):
         """Plots the distribution of the data and Nbest distribution
 
         """
         pylab.clf()
         self.hist_data()
-        self.plot_pdf()
+        self.plot_pdf(Nbest=Nbest, lw=lw)
         pylab.grid(True)
 
         Nbest = min(Nbest, len(self.distributions))

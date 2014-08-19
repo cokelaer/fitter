@@ -3,8 +3,6 @@ matrix:
   include:
     - python: 2.6
     - python: 2.7
-    - python: 2.7
-      env: TEST_ARGS=--pep8
     - python: 3.3
 
 before_install:
@@ -12,7 +10,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
-  - pip install -q --use-mirrors nose numpy pep8 pyparsing matplotlib pandas scipy
+  - pip install nose numpy pyparsing matplotlib pandas scipy
   - pip install nose coverage
   - pip install coveralls
 # # command to run tests, e.g. python setup.py test

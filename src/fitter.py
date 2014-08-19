@@ -261,7 +261,7 @@ class Fitter(object):
         # print("%(f)s exited after %(d)r seconds" % {'f': func, 'd': diff.seconds})
         if it.exc_info[0] is not None:  # if there were any exceptions
             a,b,c = it.exc_info
-            raise a,b,c  # communicate that to caller
+            raise Exception(a,b,c)  # communicate that to caller
         if it.isAlive():
             it.suicide()
             raise RuntimeError("%(f)s timed out after %(d)r seconds" % 

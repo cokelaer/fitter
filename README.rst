@@ -23,7 +23,7 @@ FITTER documentation
    :target: https://waffle.io/cokelaer/fitter
 
 
-
+Compatible with Python 2.7 and 3.3
 
 
 

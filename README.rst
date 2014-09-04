@@ -23,10 +23,8 @@ FITTER documentation
     :target: https://waffle.io/cokelaer/fitter
 
 
-Compatible with Python 2.7 and >=3.3
+Compatible with Python 2.7 and 3.3
 
-.. note:: Bug report, issues, contributions ? Please visit 
-    `gitbub <http://github.com/cokelaer/fitter>`_
 
 What is it ?
 ################

@@ -5,8 +5,8 @@ import os
 from setuptools import setup, find_packages
 import glob
 
-_MAJOR               = 0
-_MINOR               = 2
+_MAJOR               = 1
+_MINOR               = 0
 _MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
@@ -27,6 +27,7 @@ metainfo = {
           'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
           'Operating System :: OS Independent',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.4',
           'Topic :: Software Development :: Libraries :: Python Modules'
           ]
     }

@@ -3,10 +3,24 @@ from fitter import Fitter
 
 
 def test_fitter():
+    f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'], xmin=0, xmax=4)
+    f.fit()
+    f.summary()
+    assert f.xmin == 0
+    assert f.xmax == 4
+
+    # reset the range:
+    f.xmin = None
+    f.xmax = None
+    assert f.xmin == 1
+    assert f.xmax == 3
+    
+
     f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'])
     f.fit()
     f.summary()
-   
+    assert f.xmin == 1
+    assert f.xmax == 3
 
 def test_gamma():
     from scipy import stats
@@ -22,4 +36,4 @@ def test_gamma():
     f.fit()
     f.summary()
 
-
+    f.plot_pdf(names=['anglit', 'alpha'])

@@ -4,7 +4,7 @@
 FITTER documentation
 #############################
 
-**fitter** package provides a simple class to figure out from whih distribution your data comes from. It uses scipy package to try 80 ditribution and allows you to plot the results to check what is the most probable distribution.
+**fitter** package provides a simple class to figure out from whih distribution your data comes from. It uses scipy package to try 80 ditributions and allows you to plot the results to check what is the most probable distribution.
 
 
 Installation
@@ -17,7 +17,6 @@ Installation
 
 Usage
 ##################
-
 
 Nothing complicated since there is just one class provided. First, we will need to create some data samples. Let us create
 a sequence of 100000 samples from a gamma distribution::
@@ -56,5 +55,4 @@ Reference Guide
     :numbered:
 
     references
-
-    README.rst
+    contrib

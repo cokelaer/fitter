@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 __revision__ = "$Id: setup.py 3170 2013-01-16 14:57:19Z cokelaer $"
-import sys
-import os
 from setuptools import setup, find_packages
-import glob
 
 _MAJOR               = 1
 _MINOR               = 0
@@ -31,7 +28,6 @@ metainfo = {
           'Topic :: Software Development :: Libraries :: Python Modules'
           ]
     }
-
 
 
 

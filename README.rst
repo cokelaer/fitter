@@ -50,7 +50,7 @@ First, let us create a data samples with N = 1e5 points from a gamma distributio
     data = stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
 
 
-Now, without any knowledge about the distribution or its parameter, what is the distribution that fits the data best ? Scipy has 80 distributions and the :class:`fitter.Fitter` class will scan all of them, call the fit function for you, ignoring those that fail or run forever and finally give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example::
+Now, without any knowledge about the distribution or its parameter, what is the distribution that fits the data best ? Scipy has 80 distributions and the **Fitter** class will scan all of them, call the fit function for you, ignoring those that fail or run forever and finally give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example::
 
 
     from fitter import Fitter

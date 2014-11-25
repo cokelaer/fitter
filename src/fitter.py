@@ -1,10 +1,9 @@
 # -*- python -*-
 # -*- coding: utf-8 -*-
 #
-#  This file is part of the easydev software
-#  It is a modified version of console.py from the sphinx software
+#  This file is part of the fitter software
 #
-#  Copyright (c) 2011-2014
+#  Copyright (c) 2014
 #
 #  File author(s): Thomas Cokelaer <cokelaer@gmail.com>
 #
@@ -12,10 +11,17 @@
 #  See accompanying file LICENSE.txt or copy at
 #      http://www.gnu.org/licenses/gpl-3.0.html
 #
-#  Website: https://www.assembla.com/spaces/pyeasydev/wiki
-#  Documentation: http://packages.python.org/easydev
+#  source: https://github.com/cokelaer/fitter
+#  Documentation: http://packages.python.org/fitter
+#  Package: http://pypi.python.org/fitter
 #
 ##############################################################################
+"""main module of the fitter package
+
+.. sectionauthor:: Thomas Cokelaer, Aug 2014
+
+"""
+
 import sys
 import threading
 from datetime import datetime
@@ -27,17 +33,36 @@ import pandas as pd
 
 
 class Fitter(object):
-    """Given a list of distribution, fit them to a data sample.
+    """Fit a data sample to known distributions
+    
+    A naive approach often performed to figure out the undelying distribution that
+    could have generated a data set, it to compare the histogram of the data with
+    a PDF (probability distribution function) of a known distribution (e.g., normal). 
 
+    Yet, the parameters of the distribution are not known and there are lots of 
+    distributions. Therefore, an automatic way to fit many distributions to the data
+    would be useful, which is what is implemented here. 
+
+    Given a data sample, we use the `fit` method of SciPy to extract the parameters
+    of that distribution that best fit the data. We repeat this for all available distributions.
+    Finally, we provide a summary so that one can see the quality of the fit for those distributions
+
+    Here is an example where we generate a sample from a gamma distribution. 
 
     ::
 
+        >>> # First, we create a data sample following a Gamma distribution
         >>> from scipy import stats
         >>> data = stats.gamma.rvs(2, loc=1.5, scale=2, size=20000)
-        >>> import fitter
 
+        >>> # We then create the Fitter object
+        >>> import fitter
         >>> f = fitter.Fitter(data)
+
+        >>> # just a trick to use only 10 distributions instead of 80 to speed up the fitting 
         >>> f.distributions = f.distributions[0:10] + ['gamma']
+
+        >>> # fit and plot
         >>> f.fit()
         >>> f.summary()
                 sumsquare_error
@@ -48,20 +73,33 @@ class Fitter(object):
         anglit         0.051672
         [5 rows x 1 columns]
 
+    Once the data has been fitted, the :meth:`summary` metod returns a sorted dataframe where the 
 
+    Looping over the 80 distributions in SciPy could takes some times so you can overwrite the
+    :attr:`distributions` with a subset if you want. In order to reload all distributions, 
+    call :meth:`load_all_distributions`. 
 
+    Some distributions to not converge when fitting. There is a timeout of 10 seconds after which 
+    the fitting procedure is cancelled. You can change this :attr:`timeout` attribute if needed.
+
+    If the histogram of the data has outlier of very long tails, you may want to increase the
+    :attr:`bins` binning or to ignore data below or above a certain range. This can be achieved 
+    by setting the :attr:`xmin` and :attr:`xmax` attributes. If you set xmin, you can come back to 
+    the original data by setting xmin to None (same for xmax) or just recreate an instance. 
     """
 
     def __init__(self, data, xmin=None, xmax=None, bins=100, distributions=None, verbose=True):
-        """
+        """.. rubric:: Constructor
 
-        :param list data:
-        :param float xmin: if None, use the data, otherwise histogram and 
+        :param list data: a numpy array or a list
+        :param float xmin: if None, use the data minimum value, otherwise histogram and 
             fits will be cut
-        :param float xmax: if None, use the data, otherwise histogram and 
+        :param float xmax: if None, use the data maximum value, otherwise histogram and 
             fits will be cut
-        :param int bins:
-        :param list distributions:
+        :param int bins: numbers of bins to be used for the cumulative histogram. This has
+            an impact on the quality of the fit.
+        :param list distributions: give a list of distributions to look at. IF none, use
+            all scipy distributionsthat have a fit method.
         :param bool verbose:
 
         """
@@ -69,10 +107,10 @@ class Fitter(object):
         # USER input
         self._data = None
 
-        if distributions == None:
+        #: list of distributions to test
+        self.distributions = distributions
+        if self.distributions == None:
             self.load_all_distributions()
-        else:
-            self.distributions = distributions[:]
 
         self.bins = bins
         self.verbose = verbose
@@ -85,7 +123,7 @@ class Fitter(object):
         if xmax == None:
             self._xmax = self._alldata.max()
         else:
-            self._xmax = self._alldata.max()
+            self._xmax = xmax
 
         self._trim_data()
         self._update_data_pdf()
@@ -97,8 +135,6 @@ class Fitter(object):
         self.fitted_param = {}
         self.fitted_pdf = {}
         self._fitted_errors = {}
-
-    
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
@@ -115,8 +151,7 @@ class Fitter(object):
             value = self._alldata.min()
         elif value < self._alldata.min():
             value = self._alldata.min()
-        self._xmin = value
-        
+        self._xmin = value        
         self._trim_data()
         self._update_data_pdf()
     xmin = property(_get_xmin, _set_xmin, doc="consider only data above xmin. reset if None")
@@ -129,32 +164,47 @@ class Fitter(object):
         elif value > self._alldata.max():
             value = self._alldata.max()
         self._xmax = value
-
         self._trim_data()
         self._update_data_pdf()
     xmax = property(_get_xmax, _set_xmax, doc="consider only data below xmax. reset if None ")
 
     def load_all_distributions(self):
-        """Replaces the :attr:`distributions` attribute with all scipy distributions"""
+        """Replace the :attr:`distributions` attribute with all scipy distributions"""
         distributions = []
         for this in dir(scipy.stats):
             if "fit" in eval("dir(scipy.stats." + this +")"):
                 distributions.append(this)
         self.distributions = distributions[:]
     
-    def hist_data(self):
-        """Draw normed histogram of the data using :attribute:`bins`"""
+    def hist(self):
+        """Draw normed histogram of the data using :attr:`bins`
+        
+        
+        .. plot::
+
+            >>> from scipy import stats
+            >>> data = stats.gamma.rvs(2, loc=1.5, scale=2, size=20000)
+            >>> # We then create the Fitter object
+            >>> import fitter
+            >>> fitter.Fitter(data).hist()
+            
+        
+        """
         _ = pylab.hist(self._data, bins=self.bins, normed=True)
         pylab.grid(True)
 
+    def fit(self):
+        r"""Loop over distributions and find best parameter to fit the data for each 
+       
+        When a distribution is fitted onto the data, we populate a set of
+        dataframes:
 
-    def fit(self, fitall=True):
-        """Loop over distribution and find best parameter to fit the data for each 
-        
-        :param bool fitall: True means restart from scratch replacing existing results
+            - :attr:`df_errors`  :sum of the square errors between the data and the fitted
+              distribution i.e., :math:`\sum_i \left( Y_i - pdf(X_i) \right)^2`
+            - :attr:`fitted_param` : the parameters that best fit the data
+            - :attr:`fitted_pdf` : the PDF generated with the parameters that best fit the data
 
-        Fills attributes :attr:`df_errors`, :attr:`fitted_pdf`,
-        and :attr:`fitted_pdf`
+        Indices of the dataframes contains the name of the distribution.
 
         """
         for distribution in self.distributions:
@@ -162,7 +212,6 @@ class Fitter(object):
 
                 # need a subprocess to check time it takes. If too long, skip it 
                 dist = eval("scipy.stats." + distribution)
-   
 
                 # TODO here, dist.fit may take a while or just hang forever
                 # with some distributions. So, I thought to use signal module
@@ -170,7 +219,7 @@ class Fitter(object):
                 # presumably because another try/exception is inside the 
                 # fit function, so I used threading with arecipe from stackoverflow
                 # See timed_run function above
-                param = self.timed_run(dist.fit, args=self._data)
+                param = self._timed_run(dist.fit, args=self._data)
 
                 # with signal, does not work. maybe because another expection is caught 
 
@@ -221,7 +270,7 @@ class Fitter(object):
 
         """
         pylab.clf()
-        self.hist_data()
+        self.hist()
         self.plot_pdf(Nbest=Nbest, lw=lw)
         pylab.grid(True)
 
@@ -229,7 +278,7 @@ class Fitter(object):
         names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
         print(self.df_errors.ix[names])
 
-    def timed_run(self, func, args=(), kwargs={}, timeout=10, default=None):
+    def _timed_run(self, func, args=(), kwargs={},  default=None):
         """This function will spawn a thread and run the given function
         using the args, kwargs and return the given default value if the
         timeout is exceeded.
@@ -245,7 +294,7 @@ class Fitter(object):
             def run(self):
                 try:
                     self.result = func(args, **kwargs)
-                except Exception as e:
+                except Exception as err:
                     self.exc_info = sys.exc_info()
     
             def suicide(self):
@@ -271,10 +320,11 @@ class Fitter(object):
 
 
 
-""" Another way to prevent a statement to run for a long time and to 
+""" For book-keeping 
+
+Another way to prevent a statement to run for a long time and to 
 stop it is to use the signal module but did not work with scipy presumably
 because a try/except inside the distribution function interferes
-
 
 def handler(signum, frame):
     raise Exception("end of time")
@@ -282,7 +332,6 @@ def handler(signum, frame):
 import signal
 signal.signal(signal.SIGALRM, handler)
 signal.alarm(timeout)
-
 
 try:
     param = dist.fitdata)

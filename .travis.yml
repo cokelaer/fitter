@@ -7,7 +7,7 @@ matrix:
 
 os:
     - linux
-    - os
+    - osx
 
 before_install:
   - "export DISPLAY=:99.0"

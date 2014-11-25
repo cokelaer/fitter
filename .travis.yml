@@ -5,6 +5,10 @@ matrix:
     - python: 2.7
     - python: 3.3
 
+os:
+    - linux
+    - os
+
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"

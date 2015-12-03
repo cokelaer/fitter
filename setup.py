@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 _MAJOR               = 1
 _MINOR               = 0
-_MICRO               = 0
+_MICRO               = 1
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -47,6 +47,7 @@ setup(
     download_url     = metainfo['download_url'],
     classifiers      = metainfo['classifiers'],
 
+    zip_safe=False,
     # package installation
     package_dir = {'':'src'},
     #packages = [''],

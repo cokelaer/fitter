@@ -7,9 +7,6 @@ FITTER documentation
 .. image:: https://badge.fury.io/py/fitter.svg
     :target: https://pypi.python.org/pypi/fitter
 
-.. image:: https://pypip.in/d/fitter/badge.png
-    :target: https://crate.io/packages/fitter/
-
 .. image:: https://secure.travis-ci.org/cokelaer/fitter.png
     :target: http://travis-ci.org/cokelaer/fitter
 

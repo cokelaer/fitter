@@ -34,20 +34,20 @@ import pandas as pd
 
 class Fitter(object):
     """Fit a data sample to known distributions
-    
+
     A naive approach often performed to figure out the undelying distribution that
     could have generated a data set, it to compare the histogram of the data with
-    a PDF (probability distribution function) of a known distribution (e.g., normal). 
+    a PDF (probability distribution function) of a known distribution (e.g., normal).
 
-    Yet, the parameters of the distribution are not known and there are lots of 
+    Yet, the parameters of the distribution are not known and there are lots of
     distributions. Therefore, an automatic way to fit many distributions to the data
-    would be useful, which is what is implemented here. 
+    would be useful, which is what is implemented here.
 
     Given a data sample, we use the `fit` method of SciPy to extract the parameters
     of that distribution that best fit the data. We repeat this for all available distributions.
     Finally, we provide a summary so that one can see the quality of the fit for those distributions
 
-    Here is an example where we generate a sample from a gamma distribution. 
+    Here is an example where we generate a sample from a gamma distribution.
 
     ::
 
@@ -59,7 +59,7 @@ class Fitter(object):
         >>> import fitter
         >>> f = fitter.Fitter(data)
 
-        >>> # just a trick to use only 10 distributions instead of 80 to speed up the fitting 
+        >>> # just a trick to use only 10 distributions instead of 80 to speed up the fitting
         >>> f.distributions = f.distributions[0:10] + ['gamma']
 
         >>> # fit and plot
@@ -73,37 +73,40 @@ class Fitter(object):
         anglit         0.051672
         [5 rows x 1 columns]
 
-    Once the data has been fitted, the :meth:`summary` metod returns a sorted dataframe where the 
+    Once the data has been fitted, the :meth:`summary` metod returns a sorted dataframe where the
 
     Looping over the 80 distributions in SciPy could takes some times so you can overwrite the
-    :attr:`distributions` with a subset if you want. In order to reload all distributions, 
-    call :meth:`load_all_distributions`. 
+    :attr:`distributions` with a subset if you want. In order to reload all distributions,
+    call :meth:`load_all_distributions`.
 
-    Some distributions to not converge when fitting. There is a timeout of 10 seconds after which 
+    Some distributions to not converge when fitting. There is a timeout of 10 seconds after which
     the fitting procedure is cancelled. You can change this :attr:`timeout` attribute if needed.
 
     If the histogram of the data has outlier of very long tails, you may want to increase the
-    :attr:`bins` binning or to ignore data below or above a certain range. This can be achieved 
-    by setting the :attr:`xmin` and :attr:`xmax` attributes. If you set xmin, you can come back to 
-    the original data by setting xmin to None (same for xmax) or just recreate an instance. 
+    :attr:`bins` binning or to ignore data below or above a certain range. This can be achieved
+    by setting the :attr:`xmin` and :attr:`xmax` attributes. If you set xmin, you can come back to
+    the original data by setting xmin to None (same for xmax) or just recreate an instance.
     """
 
-    def __init__(self, data, xmin=None, xmax=None, bins=100, distributions=None, verbose=True):
+    def __init__(self, data, xmin=None, xmax=None, bins=100, 
+            distributions=None, verbose=True, timeout=10):
         """.. rubric:: Constructor
 
         :param list data: a numpy array or a list
-        :param float xmin: if None, use the data minimum value, otherwise histogram and 
+        :param float xmin: if None, use the data minimum value, otherwise histogram and
             fits will be cut
-        :param float xmax: if None, use the data maximum value, otherwise histogram and 
+        :param float xmax: if None, use the data maximum value, otherwise histogram and
             fits will be cut
         :param int bins: numbers of bins to be used for the cumulative histogram. This has
             an impact on the quality of the fit.
         :param list distributions: give a list of distributions to look at. IF none, use
             all scipy distributionsthat have a fit method.
         :param bool verbose:
+        :param timeout: max time for a given distribution. If timeout is
+            reached, the distribution is skipped.
 
         """
-        self.timeout = 10
+        self.timeout = timeout
         # USER input
         self._data = None
 
@@ -151,7 +154,7 @@ class Fitter(object):
             value = self._alldata.min()
         elif value < self._alldata.min():
             value = self._alldata.min()
-        self._xmin = value        
+        self._xmin = value
         self._trim_data()
         self._update_data_pdf()
     xmin = property(_get_xmin, _set_xmin, doc="consider only data above xmin. reset if None")
@@ -175,11 +178,11 @@ class Fitter(object):
             if "fit" in eval("dir(scipy.stats." + this +")"):
                 distributions.append(this)
         self.distributions = distributions[:]
-    
+
     def hist(self):
         """Draw normed histogram of the data using :attr:`bins`
-        
-        
+
+
         .. plot::
 
             >>> from scipy import stats
@@ -187,15 +190,15 @@ class Fitter(object):
             >>> # We then create the Fitter object
             >>> import fitter
             >>> fitter.Fitter(data).hist()
-            
-        
+
+
         """
         _ = pylab.hist(self._data, bins=self.bins, normed=True)
         pylab.grid(True)
 
     def fit(self):
-        r"""Loop over distributions and find best parameter to fit the data for each 
-       
+        r"""Loop over distributions and find best parameter to fit the data for each
+
         When a distribution is fitted onto the data, we populate a set of
         dataframes:
 
@@ -210,18 +213,18 @@ class Fitter(object):
         for distribution in self.distributions:
             try:
 
-                # need a subprocess to check time it takes. If too long, skip it 
+                # need a subprocess to check time it takes. If too long, skip it
                 dist = eval("scipy.stats." + distribution)
 
                 # TODO here, dist.fit may take a while or just hang forever
                 # with some distributions. So, I thought to use signal module
                 # to catch the error when signal takes too long. It did not work
-                # presumably because another try/exception is inside the 
+                # presumably because another try/exception is inside the
                 # fit function, so I used threading with arecipe from stackoverflow
                 # See timed_run function above
                 param = self._timed_run(dist.fit, args=self._data)
 
-                # with signal, does not work. maybe because another expection is caught 
+                # with signal, does not work. maybe because another expection is caught
 
                 pdf_fitted = dist.pdf(self.x, *param) # hoping the order returned by fit is the same as in pdf
 
@@ -230,13 +233,19 @@ class Fitter(object):
 
                 sq_error = pylab.sum((self.fitted_pdf[distribution] -
                     self.y)**2)
-                print("Searching best parameters for distribution {} (error {})".format(distribution, sq_error))
+                if self.verbose:
+                    print("Searching best parameters for distribution {} (error {})".format(distribution, sq_error))
 
                 # compute some errors now
                 self._fitted_errors[distribution] = sq_error
             except Exception as err:
-                print(err.message)
-                print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
+                if self.verbose:
+                    print(err.message)
+                    print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
+                # if we cannot compute the error, set it to large values
+                # FIXME use inf
+                self._fitted_errors[distribution] = 1e6
+
 
 
         self.df_errors = pd.DataFrame({'sumsquare_error':self._fitted_errors})
@@ -244,7 +253,7 @@ class Fitter(object):
     def plot_pdf(self, names=None, Nbest=5, lw=2):
         """Plots Probability density functions of the distributions
 
-        :param str,list names: names can be a single distribution name, or a list 
+        :param str,list names: names can be a single distribution name, or a list
             of distribution names, or kept as None, in which case, the first Nbest
             distribution will be taken (default to best 5)
 
@@ -284,22 +293,22 @@ class Fitter(object):
         timeout is exceeded.
 
         http://stackoverflow.com/questions/492519/timeout-on-a-python-function-call
-        """ 
+        """
         class InterruptableThread(threading.Thread):
             def __init__(self):
                 threading.Thread.__init__(self)
                 self.result = default
                 self.exc_info = (None, None, None)
-    
+
             def run(self):
                 try:
                     self.result = func(args, **kwargs)
                 except Exception as err:
                     self.exc_info = sys.exc_info()
-    
+
             def suicide(self):
                 raise RuntimeError('Stop has been called')
-    
+
         it = InterruptableThread()
         it.start()
         # print("calling %(func)r for %(timeout)r seconds" % locals())
@@ -313,16 +322,16 @@ class Fitter(object):
             raise Exception(a,b,c)  # communicate that to caller
         if it.isAlive():
             it.suicide()
-            raise RuntimeError("%(f)s timed out after %(d)r seconds" % 
+            raise RuntimeError("%(f)s timed out after %(d)r seconds" %
                     {'f': func, 'd': diff.seconds})
         else:
             return it.result
 
 
 
-""" For book-keeping 
+""" For book-keeping
 
-Another way to prevent a statement to run for a long time and to 
+Another way to prevent a statement to run for a long time and to
 stop it is to use the signal module but did not work with scipy presumably
 because a try/except inside the distribution function interferes
 

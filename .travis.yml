@@ -19,10 +19,8 @@ before_install:
     - "sh -e /etc/init.d/xvfb start"
 
 
-
-
 install: 
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy pyparasing scipy matplotlib nose pandas nose
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy pyparsing scipy matplotlib nose pandas nose
   - pip install nose coverage
   - pip install coveralls
 # # command to run tests, e.g. python setup.py test

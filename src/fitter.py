@@ -268,7 +268,12 @@ class Fitter(object):
         elif names:
             pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         else:
-            names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
+            try:
+                names = self.df_errors.sort_values(
+                        by="sumsquare_error").index[0:Nbest]
+            except:
+                names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
+
             for name in names:
                 pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         pylab.grid(True)
@@ -284,7 +289,11 @@ class Fitter(object):
         pylab.grid(True)
 
         Nbest = min(Nbest, len(self.distributions))
-        names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
+        try:
+            names = self.df_errors.sort_values(
+                    by="sumsquare_error").index[0:Nbest]
+        except:
+            names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
         print(self.df_errors.ix[names])
 
     def _timed_run(self, func, args=(), kwargs={},  default=None):

@@ -1,6 +1,6 @@
 
 
-pypiview module
+fitter module
 ================
 
 .. automodule:: fitter

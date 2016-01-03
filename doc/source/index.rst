@@ -89,5 +89,6 @@ Reference Guide
     :maxdepth: 2
     :numbered:
 
+    history
     references
     contrib

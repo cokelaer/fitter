@@ -240,13 +240,11 @@ class Fitter(object):
                 self._fitted_errors[distribution] = sq_error
             except Exception as err:
                 if self.verbose:
-                    print(err.message)
+                    print(err)
                     print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
                 # if we cannot compute the error, set it to large values
                 # FIXME use inf
                 self._fitted_errors[distribution] = 1e6
-
-
 
         self.df_errors = pd.DataFrame({'sumsquare_error':self._fitted_errors})
 

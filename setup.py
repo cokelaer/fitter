@@ -50,10 +50,12 @@ setup(
     zip_safe=False,
     # package installation
     package_dir = {'':'src'},
+
     #packages = [''],
     requires = ['sphinx', 'numpy', 'matplotlib', 'scipy', 'pandas']
-    # sphinx is not stricly speaking required but this is very useful to build documentation
-    # once installed, one can just build the doc himself
+    # sphinx is not stricly speaking required but this is very 
+    # useful to build documentation once installed, one can just 
+    # build the doc himself
 
 )
 

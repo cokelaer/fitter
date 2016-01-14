@@ -4,3 +4,4 @@ try:
 except Exception:
     version = "unknown"
 
+from .fitter import Fitter

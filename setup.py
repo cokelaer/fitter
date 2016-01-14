@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 _MAJOR               = 1
 _MINOR               = 0
-_MICRO               = 2
+_MICRO               = 4
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -50,8 +50,7 @@ setup(
     zip_safe=False,
     # package installation
     package_dir = {'':'src'},
-
-    #packages = [''],
+    packages = ['fitter'],
     requires = ['sphinx', 'numpy', 'matplotlib', 'scipy', 'pandas']
     # sphinx is not stricly speaking required but this is very 
     # useful to build documentation once installed, one can just 

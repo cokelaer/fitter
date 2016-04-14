@@ -277,6 +277,21 @@ class Fitter(object):
         pylab.grid(True)
         pylab.legend()
 
+
+    def get_best(self):
+        """Return best fitted distribution and its parameters
+
+        a dictionary with one key (the distribution name) and its parameters
+
+        
+        """
+        # self.df should be sorted, so then us take the first one as the best
+        name = self.df_errors.iloc[0].name
+        params = self.fitted_param[name]
+        return {name: params}
+        
+        
+
     def summary(self, Nbest=5, lw=2):
         """Plots the distribution of the data and Nbest distribution
 

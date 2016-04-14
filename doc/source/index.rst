@@ -25,7 +25,7 @@ a sequence of 100000 samples from a gamma distribution::
     data = stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
 
 
-Now, the question without any knowledge about the distribution of its parameter, what is a probable distributions that fit the data? scipy has 80 distribution with a method called **fit** that will help us here. The :class:`fitter.Fitter` will scan all the scipy distributions, call the fit function for you, ignoring those that fail or run forever and finally it will give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example:
+Now, we may ask ourself (without any knowledge about the distribution or its parameter) what is a probable distributions that fit the data best ? scipy has 80 distributions, each has a method called **fit** that will help us here. The :class:`~fitter.fitter.Fitter` will scan all the scipy distributions, call the fit function for you, ignoring those that fail or run forever and finally it will give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example:
 
 
 .. plot::
@@ -45,7 +45,7 @@ distributions to considered. If you do not provide that parameter, 80
 distributions will be considered (the analysis will be longer).
 
 
-The :meth:`fitter.Fitter.summary` method shows the first best distributions (in
+The :meth:`fitter.fitter.Fitter.summary` method shows the first best distributions (in
 terms of fitting). 
 
 Once the fitting is performed, one may want to get the parameters 

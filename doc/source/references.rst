@@ -3,7 +3,7 @@
 fitter module
 ================
 
-.. automodule:: fitter
+.. automodule:: fitter.fitter
     :members:
     :inherited-members:
     :synopsis: 

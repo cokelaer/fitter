@@ -289,8 +289,6 @@ class Fitter(object):
         name = self.df_errors.iloc[0].name
         params = self.fitted_param[name]
         return {name: params}
-        
-        
 
     def summary(self, Nbest=5, lw=2):
         """Plots the distribution of the data and Nbest distribution
@@ -307,7 +305,7 @@ class Fitter(object):
                     by="sumsquare_error").index[0:Nbest]
         except:
             names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
-        print(self.df_errors.ix[names])
+        return self.df_errors.ix[names]
 
     def _timed_run(self, func, args=(), kwargs={},  default=None):
         """This function will spawn a thread and run the given function

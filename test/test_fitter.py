@@ -34,6 +34,7 @@ def test_gamma():
     f.xmax=10
     f.distributions = f.distributions[:3:]
     f.fit()
-    f.summary()
+    df = f.summary()
+    assert len(df)
 
     f.plot_pdf(names=['anglit', 'alpha'])

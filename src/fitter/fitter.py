@@ -286,7 +286,7 @@ class Fitter(object):
         
         """
         # self.df should be sorted, so then us take the first one as the best
-        name = self.df_errors.iloc[0].name
+        name = self.df_errors.sort('sumsquare_error').iloc[0].name
         params = self.fitted_param[name]
         return {name: params}
 

@@ -36,7 +36,7 @@ class Fitter(object):
     """Fit a data sample to known distributions
 
     A naive approach often performed to figure out the undelying distribution that
-    could have generated a data set, it to compare the histogram of the data with
+    could have generated a data set, is to compare the histogram of the data with
     a PDF (probability distribution function) of a known distribution (e.g., normal).
 
     Yet, the parameters of the distribution are not known and there are lots of
@@ -79,7 +79,7 @@ class Fitter(object):
     :attr:`distributions` with a subset if you want. In order to reload all distributions,
     call :meth:`load_all_distributions`.
 
-    Some distributions to not converge when fitting. There is a timeout of 10 seconds after which
+    Some distributions do not converge when fitting. There is a timeout of 10 seconds after which
     the fitting procedure is cancelled. You can change this :attr:`timeout` attribute if needed.
 
     If the histogram of the data has outlier of very long tails, you may want to increase the

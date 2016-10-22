@@ -21,7 +21,6 @@
 .. sectionauthor:: Thomas Cokelaer, Aug 2014
 
 """
-
 import sys
 import threading
 from datetime import datetime
@@ -88,7 +87,7 @@ class Fitter(object):
     the original data by setting xmin to None (same for xmax) or just recreate an instance.
     """
 
-    def __init__(self, data, xmin=None, xmax=None, bins=100, 
+    def __init__(self, data, xmin=None, xmax=None, bins=100,
             distributions=None, verbose=True, timeout=10):
         """.. rubric:: Constructor
 
@@ -182,7 +181,6 @@ class Fitter(object):
     def hist(self):
         """Draw normed histogram of the data using :attr:`bins`
 
-
         .. plot::
 
             >>> from scipy import stats
@@ -212,7 +210,6 @@ class Fitter(object):
         """
         for distribution in self.distributions:
             try:
-
                 # need a subprocess to check time it takes. If too long, skip it
                 dist = eval("scipy.stats." + distribution)
 
@@ -222,26 +219,24 @@ class Fitter(object):
                 # presumably because another try/exception is inside the
                 # fit function, so I used threading with arecipe from stackoverflow
                 # See timed_run function above
-                param = self._timed_run(dist.fit, args=self._data)
+                param = self._timed_run(dist.fit, distribution, args=self._data)
 
                 # with signal, does not work. maybe because another expection is caught
-
                 pdf_fitted = dist.pdf(self.x, *param) # hoping the order returned by fit is the same as in pdf
 
                 self.fitted_param[distribution] = param[:]
                 self.fitted_pdf[distribution] = pdf_fitted
 
-                sq_error = pylab.sum((self.fitted_pdf[distribution] -
-                    self.y)**2)
+                sq_error = pylab.sum((self.fitted_pdf[distribution] - self.y)**2)
                 if self.verbose:
-                    print("Searching best parameters for distribution {} (error {})".format(distribution, sq_error))
+                    print("Fitted {} distribution with error={})".format(distribution, sq_error))
 
                 # compute some errors now
                 self._fitted_errors[distribution] = sq_error
             except Exception as err:
                 if self.verbose:
-                    print(err)
-                    print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
+                    print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, 
+                        self.timeout))
                 # if we cannot compute the error, set it to large values
                 # FIXME use inf
                 self._fitted_errors[distribution] = 1e6
@@ -273,17 +268,18 @@ class Fitter(object):
                 names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
 
             for name in names:
-                pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+                if name in self.fitted_pdf.keys():
+                    pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+                else:
+                    print("%s was not fitted. no parameters available" % name)
         pylab.grid(True)
         pylab.legend()
-
 
     def get_best(self):
         """Return best fitted distribution and its parameters
 
         a dictionary with one key (the distribution name) and its parameters
 
-        
         """
         # self.df should be sorted, so then us take the first one as the best
         name = self.df_errors.sort('sumsquare_error').iloc[0].name
@@ -307,7 +303,7 @@ class Fitter(object):
             names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
         return self.df_errors.ix[names]
 
-    def _timed_run(self, func, args=(), kwargs={},  default=None):
+    def _timed_run(self, func, distribution, args=(), kwargs={},  default=None):
         """This function will spawn a thread and run the given function
         using the args, kwargs and return the given default value if the
         timeout is exceeded.
@@ -331,19 +327,18 @@ class Fitter(object):
 
         it = InterruptableThread()
         it.start()
-        # print("calling %(func)r for %(timeout)r seconds" % locals())
         started_at = datetime.now()
         it.join(self.timeout)
         ended_at = datetime.now()
         diff = ended_at - started_at
-        # print("%(f)s exited after %(d)r seconds" % {'f': func, 'd': diff.seconds})
+
         if it.exc_info[0] is not None:  # if there were any exceptions
             a,b,c = it.exc_info
             raise Exception(a,b,c)  # communicate that to caller
+
         if it.isAlive():
             it.suicide()
-            raise RuntimeError("%(f)s timed out after %(d)r seconds" %
-                    {'f': func, 'd': diff.seconds})
+            raise RuntimeError
         else:
             return it.result
 
@@ -363,7 +358,7 @@ signal.signal(signal.SIGALRM, handler)
 signal.alarm(timeout)
 
 try:
-    param = dist.fitdata)
+    param = dist.fit(data)
 except Exception as err:
     print(err.message)
 

@@ -15,7 +15,7 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-
+import sphinx
 
 try:
     from easydev import get_path_sphinx_themes
@@ -44,6 +44,9 @@ project = "fitter"
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 
 extensions = [
+    ('sphinx.ext.imgmath'  # only available for sphinx >= 1.4
+         if sphinx.version_info[:2] >= (1, 4)
+         else 'sphinx.ext.pngmath'),
     'sphinx.ext.autodoc', 
     'sphinx.ext.autosummary', 
     'sphinx.ext.coverage', 
@@ -54,8 +57,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'easydev.copybutton',
     'matplotlib.sphinxext.plot_directive',
-    'matplotlib.sphinxext.only_directives',
-    'sphinx.ext.pngmath',
     ]
 
 

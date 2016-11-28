@@ -46,12 +46,12 @@ distributions will be considered (the analysis will be longer).
 
 
 The :meth:`fitter.fitter.Fitter.summary` method shows the first best distributions (in
-terms of fitting). 
+terms of fitting).
 
-Once the fitting is performed, one may want to get the parameters 
+Once the fitting is performed, one may want to get the parameters
 corresponding to the best distribution. The
 parameters are stored in :attr:`fitted_param`. For instance in the example
-above, the summary told us that the Gamma distribution has the best fit. You 
+above, the summary told us that the Gamma distribution has the best fit. You
 would retrieve the parameters of the Gamma distribution as follows::
 
     >>> f.fitted_param['gamma']
@@ -59,10 +59,10 @@ would retrieve the parameters of the Gamma distribution as follows::
 
 Here, you will need to look at scipy documentation to figure out what are those
 parameters (mean, sigma, shape, ...). For convenience, we  do provide the corresponding PDF::
-    
+
     f.fitted_pdf['gamma']
 
-but you may want to plot the gamma distribution yourself. In that case, you will need to use Scipy package itself. Here is an example 
+but you may want to plot the gamma distribution yourself. In that case, you will need to use Scipy package itself. Here is an example
 
 .. plot::
     :include-source:
@@ -70,7 +70,7 @@ but you may want to plot the gamma distribution yourself. In that case, you will
 
     from pylab import linspace, plot
     import scipy.stats
-    
+
     dist = scipy.stats.gamma
     param = (1.9870, 1.5026, 2.0174)
     X = linspace(0,10, 10)

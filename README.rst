@@ -41,11 +41,12 @@ Usage
 ##################
 
 
-First, let us create a data samples with N = 1e5 points from a gamma distribution::
+First, let us create a data samples with N = 10,000 points from a gamma distribution::
 
     from scipy import stats
-    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
+    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=10000)
 
+.. note:: the fitting is slow so keep the size value to reasonable value.
 
 Now, without any knowledge about the distribution or its parameter, what is the distribution that fits the data best ? Scipy has 80 distributions and the **Fitter** class will scan all of them, call the fit function for you, ignoring those that fail or run forever and finally give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example::
 

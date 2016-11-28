@@ -47,16 +47,17 @@ extensions = [
     ('sphinx.ext.imgmath'  # only available for sphinx >= 1.4
          if sphinx.version_info[:2] >= (1, 4)
          else 'sphinx.ext.pngmath'),
-    'sphinx.ext.autodoc', 
+    'sphinx.ext.autodoc',
     'sphinx.ext.autosummary', 
-    'sphinx.ext.coverage', 
-    'sphinx.ext.doctest', 
-    'sphinx.ext.intersphinx', 
+    'sphinx.ext.coverage',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'easydev.copybutton',
     'matplotlib.sphinxext.plot_directive',
+    #'sphinx_gallery.gen_gallery'
     ]
 
 

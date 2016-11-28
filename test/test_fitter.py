@@ -14,7 +14,7 @@ def test_fitter():
     f.xmax = None
     assert f.xmin == 1
     assert f.xmax == 3
-    
+
 
     f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'])
     f.fit()
@@ -24,7 +24,7 @@ def test_fitter():
 
 def test_gamma():
     from scipy import stats
-    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
+    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=10000)
 
 
     f = Fitter(data, bins=100)
@@ -32,9 +32,9 @@ def test_gamma():
     f.xmax = 1000000 # no effet
     f.xmin=0.1
     f.xmax=10
-    f.distributions = f.distributions[:3:]
+    f.distributions = ['gamma', "alpha"]
     f.fit()
     df = f.summary()
     assert len(df)
 
-    f.plot_pdf(names=['anglit', 'alpha'])
+    f.plot_pdf(names=["gamma"])

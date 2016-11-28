@@ -88,7 +88,7 @@ class Fitter(object):
     """
 
     def __init__(self, data, xmin=None, xmax=None, bins=100,
-            distributions=None, verbose=True, timeout=10):
+            distributions=None, verbose=True, timeout=30):
         """.. rubric:: Constructor
 
         :param list data: a numpy array or a list
@@ -104,6 +104,7 @@ class Fitter(object):
         :param timeout: max time for a given distribution. If timeout is
             reached, the distribution is skipped.
 
+        .. versionchanged:: 1.0.8 increase timeout from 10 to 30 seconds.
         """
         self.timeout = timeout
         # USER input

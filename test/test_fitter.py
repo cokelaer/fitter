@@ -38,3 +38,8 @@ def test_gamma():
     assert len(df)
 
     f.plot_pdf(names=["gamma"])
+    f.plot_pdf(names="gamma")
+
+    res = f.get_best()
+    assert "gamma" in res.keys()
+

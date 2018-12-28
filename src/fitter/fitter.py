@@ -190,7 +190,6 @@ class Fitter(object):
             >>> import fitter
             >>> fitter.Fitter(data).hist()
 
-
         """
         _ = pylab.hist(self._data, bins=self.bins, normed=True)
         pylab.grid(True)

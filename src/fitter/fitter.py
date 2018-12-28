@@ -253,14 +253,15 @@ class Fitter(object):
 
 
         """
-        assert Nbest>0
+        assert Nbest > 0
         if Nbest > len(self.distributions):
             Nbest = len(self.distributions)
+
         if isinstance(names, list):
             for name in names:
                 pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
         elif names:
-            pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+            pylab.plot(self.x, self.fitted_pdf[names], lw=lw, label=names)
         else:
             try:
                 names = self.df_errors.sort_values(
@@ -302,7 +303,7 @@ class Fitter(object):
                     by="sumsquare_error").index[0:Nbest]
         except:
             names = self.df_errors.sort("sumsquare_error").index[0:Nbest]
-        return self.df_errors.ix[names]
+        return self.df_errors.loc[names]
 
     def _timed_run(self, func, distribution, args=(), kwargs={},  default=None):
         """This function will spawn a thread and run the given function

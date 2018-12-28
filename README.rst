@@ -20,7 +20,7 @@ FITTER documentation
     :target: https://waffle.io/cokelaer/fitter
 
 
-Compatible with Python 2.7 and 3.3, 3.4, 3.5
+Compatible with Python 2.7 and 3.4, 3.5, 3.6
 
 
 What is it ?

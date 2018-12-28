@@ -51,11 +51,7 @@ setup(
     # package installation
     package_dir = {'':'src'},
     packages = ['fitter'],
-    install_requires = ['sphinx', 'numpy', 'matplotlib', 'scipy>=0.18', 'pandas']
-    # sphinx is not stricly speaking required but this is very 
-    # useful to build documentation once installed, one can just 
-    # build the doc himself
-
+    install_requires = open("requirements.txt").read(),
 )
 
 

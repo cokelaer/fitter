@@ -1,10 +1,14 @@
 language: python
+cache:
+  directories:
+    - $HOME/.cache/pip
+
 matrix:
   include:
     - python: 2.7
     - python: 3.4
     - python: 3.5
-
+    - python: 3.6
 
 before_install:
     - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -12,18 +16,21 @@ before_install:
     - ./miniconda.sh -b
     - export PATH=/home/travis/miniconda3/bin:$PATH
     - conda update --yes conda
-    # This help testing code with pylab
+    - conda config --add channels r
+    - conda config --add channels bioconda
+    - conda config --add channels conda-forge
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
 
 
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy pyparsing scipy>=0.18 matplotlib pandas nose
-  - pip install nose coverage
-  - pip install coveralls
+  - conda install --yes --file requirements.txt
+  - conda install --yes --file requirements_dev.txt
+  - pip install .
 # # command to run tests, e.g. python setup.py test
 script:
-  - python setup.py nosetests --with-coverage --cover-package fitter
+  - pytest -v --durations=10  test/ --cov=spectrum --cov-report term --timeout 300 
 
 after_success:
   coveralls

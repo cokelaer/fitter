@@ -1,0 +1,7 @@
+pytest
+pytest-cov
+pytest-xdist
+pytest-mock
+pytest-timeout
+pytest-runner
+coveralls

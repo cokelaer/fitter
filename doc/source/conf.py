@@ -17,11 +17,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import sphinx
 
-try:
-    from easydev import get_path_sphinx_themes
-except Exception, e:
-    print "Install easydev or set your PYTHONPATH properly"
-    raise Exception
 
 import pkg_resources
 version = pkg_resources.require("fitter")[0].version
@@ -55,7 +50,6 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'easydev.copybutton',
     'matplotlib.sphinxext.plot_directive',
     #'sphinx_gallery.gen_gallery'
     ]
@@ -72,12 +66,6 @@ graphviz_dot_args = ['-Gsize=15,15', '-Nfontsize=34']
 
 todo_include_todos=True
 jscopybutton_path = "copybutton.js"
-try:
-    from easydev.copybutton import get_copybutton_path 
-    from easydev.copybutton import copy_javascript_into_static_path
-    copy_javascript_into_static_path("_static", get_copybutton_path())
-except Exception:
-    print("could not copy the copybutton javascript")
 
 
 autoclass_content = 'both'

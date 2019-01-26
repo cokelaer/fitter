@@ -146,7 +146,7 @@ html_theme = 'standard'
 # html_theme_options = {'homepage': init_sphinx.url}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [get_path_sphinx_themes()]
+#html_theme_path = [get_path_sphinx_themes()]
 
 
 

@@ -141,7 +141,7 @@ class Fitter(object):
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
-        self.y, self.x = np.histogram(self._data, bins=self.bins, normed=True) # not to show
+        self.y, self.x = np.histogram(self._data, bins=self.bins, density=True) # not to show
         self.x = [(this+self.x[i+1])/2. for i,this in enumerate(self.x[0:-1])]
 
     def _trim_data(self):
@@ -191,7 +191,7 @@ class Fitter(object):
             >>> fitter.Fitter(data).hist()
 
         """
-        _ = pylab.hist(self._data, bins=self.bins, normed=True)
+        _ = pylab.hist(self._data, bins=self.bins, density=True)
         pylab.grid(True)
 
     def fit(self):
@@ -287,14 +287,15 @@ class Fitter(object):
         params = self.fitted_param[name]
         return {name: params}
 
-    def summary(self, Nbest=5, lw=2):
+    def summary(self, Nbest=5, lw=2, plot=True):
         """Plots the distribution of the data and Nbest distribution
 
         """
-        pylab.clf()
-        self.hist()
-        self.plot_pdf(Nbest=Nbest, lw=lw)
-        pylab.grid(True)
+        if plot:
+            pylab.clf()
+            self.hist()
+            self.plot_pdf(Nbest=Nbest, lw=lw)
+            pylab.grid(True)
 
         Nbest = min(Nbest, len(self.distributions))
         try:

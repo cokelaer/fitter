@@ -4,15 +4,25 @@
 FITTER documentation
 #############################
 
-**fitter** package provides a simple class to figure out from whih distribution your data comes from. It uses scipy package to try 80 distributions and allows you to plot the results to check what is the most probable distribution.
+A common tasks in data science or statistics it is identify the underlying
+distribution from which your data comes from. Usually, an histogram can give you
+a good idea but there are many distributions in real life. The **fitter** package 
+provides a simple class to figure out from which distribution your data comes from. 
+It uses scipy package to test about 80 distributions and allows you to plot the 
+results to check what is the most probable distribution.
 
 
 Installation
 ###################
 
-::
+**fitter** is a Python package available the Pypi website. It can be installed
+with Python using the **pip** executable::
 
     pip install fitter
+
+**fitter** is also available on **conda** (bioconda channel)::
+
+    conda install fitter
 
 
 Usage
@@ -25,7 +35,7 @@ a sequence of 100000 samples from a gamma distribution::
     data = stats.gamma.rvs(2, loc=1.5, scale=2, size=100000)
 
 
-Now, we may ask ourself (without any knowledge about the distribution or its parameter) what is a probable distributions that fit the data best ? scipy has 80 distributions, each has a method called **fit** that will help us here. The :class:`~fitter.fitter.Fitter` will scan all the scipy distributions, call the fit function for you, ignoring those that fail or run forever and finally it will give you a summary of the best distributions in the sense of sum of the square errors. The best is to give an example:
+Now, we may ask ourself (without any knowledge about the distribution or its parameter) what is the most probable distribution that fits the data best ? Scipy package has 80 distributions, each of them has a method called **fit** that will help us here. The :class:`~fitter.fitter.Fitter` will first scan all the scipy distributions, then calls the fit function for you, ignoring those that fail or run forever and finally it will give you a summary of the best distributions in the sense of sum of the square errors. Here is an example:
 
 
 .. plot::
@@ -75,7 +85,7 @@ but you may want to plot the gamma distribution yourself. In that case, you will
     param = (1.9870, 1.5026, 2.0174)
     X = linspace(0,10, 10)
     pdf_fitted = dist.pdf(X, *param)
-    plot(X, pdf_fitted, 'o')
+    plot(X, pdf_fitted, 'o-')
 
 
 
@@ -84,11 +94,16 @@ but you may want to plot the gamma distribution yourself. In that case, you will
 Reference Guide
 ##################
 
-
 .. toctree::
     :maxdepth: 2
-    :numbered:
+
+    references
+
+MISC
+#####
+
+.. toctree::
+    :maxdepth: 1
 
     history
-    references
     contrib

@@ -3,8 +3,8 @@ __revision__ = "$Id: setup.py 3170 2013-01-16 14:57:19Z cokelaer $"
 from setuptools import setup, find_packages
 
 _MAJOR               = 1
-_MINOR               = 0
-_MICRO               = 9
+_MINOR               = 1
+_MICRO               = 10
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 

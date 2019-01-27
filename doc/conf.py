@@ -50,7 +50,7 @@ extensions = [
     'sphinx.ext.autosummary', 
     'sphinx.ext.coverage',
     'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
+    #'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'matplotlib.sphinxext.plot_directive',

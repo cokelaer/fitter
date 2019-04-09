@@ -4,6 +4,29 @@
 FITTER documentation
 #############################
 
+.. image:: https://badge.fury.io/py/fitter.svg
+    :target: https://pypi.python.org/pypi/fitter
+
+.. image:: https://secure.travis-ci.org/cokelaer/fitter.png
+    :target: http://travis-ci.org/cokelaer/fitter
+
+.. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
+    :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
+
+.. image:: https://landscape.io/github/cokelaer/fitter/master/landscape.png
+    :target: https://landscape.io/github/cokelaer/fitter/master
+
+
+
+Compatible with Python 2.7 and 3.4, 3.5, 3.6
+
+
+What is it ?
+################
+
+**fitter** package provides a simple class to identify the distribution from which a data samples is generated from. It uses 80 distributions from Scipy and allows you to plot the results to check what is the most probable distribution and the best parameters.
+
+
 A common tasks in data science or statistics it is identify the underlying
 distribution from which your data comes from. Usually, an histogram can give you
 a good idea but there are many distributions in real life. The **fitter** package 

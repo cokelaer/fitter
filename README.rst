@@ -13,12 +13,6 @@ FITTER documentation
 .. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
     :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
 
-.. image:: https://landscape.io/github/cokelaer/fitter/master/landscape.png
-    :target: https://landscape.io/github/cokelaer/fitter/master
-
-.. image:: https://badge.waffle.io/cokelaer/fitter.png?label=ready&title=Ready 
-    :target: https://waffle.io/cokelaer/fitter
-
 
 Compatible with Python 2.7 and 3.4, 3.5, 3.6
 

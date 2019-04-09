@@ -4,6 +4,10 @@ from fitter import Fitter
 
 def test_fitter():
     f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'], xmin=0, xmax=4)
+    try:
+        f.plot_pdf()
+    except:
+        pass
     f.fit()
     f.summary()
     assert f.xmin == 0

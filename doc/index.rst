@@ -18,7 +18,8 @@ FITTER documentation
 
 
 
-Compatible with Python 2.7 and 3.4, 3.5, 3.6
+Compatible with Python 2.7, 3.5 and 3.6 (most probably 3.4 and 3.7 as well but
+not tested on travis)
 
 
 What is it ?

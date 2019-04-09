@@ -14,7 +14,8 @@ FITTER documentation
     :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
 
 
-Compatible with Python 2.7 and 3.4, 3.5, 3.6
+Compatible with Python 2.7 and 3.5, 3.6 (3.4 and 3.7 most probably but not
+tested on travis)
 
 
 What is it ?

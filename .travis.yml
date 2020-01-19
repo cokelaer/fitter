@@ -9,6 +9,9 @@ matrix:
     - python: 3.5
     - python: 3.6
 
+services:
+  - xvfb
+
 before_install:
 
 
@@ -21,7 +24,7 @@ before_install:
     - conda config --add channels bioconda
     - conda config --add channels conda-forge
     - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
+
 
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
@@ -33,7 +36,7 @@ install:
   - pip install .
 # # command to run tests, e.g. python setup.py test
 script:
-  - pytest -v --durations=10  test/ --cov=spectrum --cov-report term --timeout 300
+  - pytest -v --durations=10  test/ --cov=fitter --cov-report term --timeout 300
 
 after_success:
   coveralls

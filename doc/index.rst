@@ -76,7 +76,8 @@ Now, we may ask ourself (without any knowledge about the distribution or its par
 
 Here, we restrict the analysis to only 3 distributions by providing the list of
 distributions to considered. If you do not provide that parameter, 80
-distributions will be considered (the analysis will be longer).
+distributions will be considered (the analysis will be longer) and computation
+make take a while to finish.
 
 
 The :meth:`fitter.fitter.Fitter.summary` method shows the first best distributions (in
@@ -115,19 +116,13 @@ but you may want to plot the gamma distribution yourself. In that case, you will
 
 
 
-Reference Guide
-##################
+Documentation
+#############
 
 .. toctree::
     :maxdepth: 2
 
+    faqs
     references
-
-MISC
-#####
-
-.. toctree::
-    :maxdepth: 1
-
     history
     contrib

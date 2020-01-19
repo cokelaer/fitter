@@ -1,7 +1,7 @@
 
 
-fitter module
-================
+Fitter module reference
+=======================
 
 .. automodule:: fitter.fitter
     :members:

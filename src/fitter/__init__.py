@@ -4,4 +4,4 @@ try:
 except Exception:
     version = "unknown"
 
-from .fitter import Fitter
+from .fitter import Fitter, get_distributions, get_common_distributions

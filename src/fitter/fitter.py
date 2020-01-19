@@ -18,7 +18,7 @@
 ##############################################################################
 """main module of the fitter package
 
-.. sectionauthor:: Thomas Cokelaer, Aug 2014
+.. sectionauthor:: Thomas Cokelaer, Aug 2014-2020
 
 """
 import sys
@@ -30,6 +30,26 @@ import numpy as np
 import pylab
 import pandas as pd
 from scipy.stats import entropy as kl_div
+
+
+__all__ = ['get_common_distributions', 'get_distributions', 'Fitter']
+
+
+def get_distributions(): 
+    distributions = []
+    for this in dir(scipy.stats):
+        if "fit" in eval("dir(scipy.stats." + this + ")"):
+            distributions.append(this)
+    return distributions
+
+def get_common_distributions():
+    distributions = get_distributions()
+    # to avoid error due to changes in scipy
+    common = ['cauchy', 'chi2', 'expon', 'exponpow', 'gamma',
+         'lognorm', 'norm', 'powerlaw', 'rayleigh', 'uniform']
+    common = [x for x in common if x in distributions]
+    return common
+
 
 class Fitter(object):
     """Fit a data sample to known distributions
@@ -98,8 +118,12 @@ class Fitter(object):
             fits will be cut
         :param int bins: numbers of bins to be used for the cumulative histogram. This has
             an impact on the quality of the fit.
-        :param list distributions: give a list of distributions to look at. IF none, use
-            all scipy distributionsthat have a fit method.
+        :param list distributions: give a list of distributions to look at. If none, use
+            all scipy distributions that have a fit method. If you want to use
+            only one distribution and know its name, you may provide a string (e.g.
+            'gamma'). Finally, you may set to 'common' to  include only common
+            distributions, which are: cauchy, chi2, expon, exponpow, gamma,
+                 lognorm, norm, powerlaw, irayleigh, uniform.
         :param bool verbose:
         :param timeout: max time for a given distribution. If timeout is
             reached, the distribution is skipped.
@@ -113,7 +137,11 @@ class Fitter(object):
         #: list of distributions to test
         self.distributions = distributions
         if self.distributions == None:
-            self.load_all_distributions()
+            self._load_all_distributions()
+        elif self.distributions == "common":
+            self.distributions = get_common_distributions()
+        elif isinstance(distributions, str):
+            self.distributions = [distributions]
 
         self.bins = bins
         self.verbose = verbose
@@ -181,13 +209,9 @@ class Fitter(object):
     xmax = property(_get_xmax, _set_xmax,
                     doc="consider only data below xmax. reset if None ")
 
-    def load_all_distributions(self):
+    def _load_all_distributions(self):
         """Replace the :attr:`distributions` attribute with all scipy distributions"""
-        distributions = []
-        for this in dir(scipy.stats):
-            if "fit" in eval("dir(scipy.stats." + this + ")"):
-                distributions.append(this)
-        self.distributions = distributions[:]
+        self.distributions = get_distributions()
 
     def hist(self):
         """Draw normed histogram of the data using :attr:`bins`
@@ -227,7 +251,7 @@ class Fitter(object):
                 # with some distributions. So, I thought to use signal module
                 # to catch the error when signal takes too long. It did not work
                 # presumably because another try/exception is inside the
-                # fit function, so I used threading with arecipe from stackoverflow
+                # fit function, so I used threading with a recipe from stackoverflow
                 # See timed_run function above
                 param = self._timed_run(
                     dist.fit, distribution, args=self._data)

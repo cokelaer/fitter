@@ -108,7 +108,8 @@ class Fitter(object):
     """
 
     def __init__(self, data, xmin=None, xmax=None, bins=100,
-                 distributions=None, verbose=True, timeout=30):
+                 distributions=None, verbose=True, timeout=30, 
+                 density=True):
         """.. rubric:: Constructor
 
         :param list data: a numpy array or a list
@@ -133,6 +134,14 @@ class Fitter(object):
         self.timeout = timeout
         # USER input
         self._data = None
+
+        # Issue https://github.com/cokelaer/fitter/issues/22 asked for setting
+        # the density to False in the fitting and plotting. I first tought it
+        # would be possible, but the fitting is performed using the PDF of scipy
+        # so one would still need to normalise the data so that it is
+        # comparable. Therefore I do not see anyway to do it without using
+        # density set to True for now.
+        self._density = True
 
         #: list of distributions to test
         self.distributions = distributions
@@ -173,7 +182,7 @@ class Fitter(object):
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
         self.y, self.x = np.histogram(
-            self._data, bins=self.bins, density=True)  # not to show
+            self._data, bins=self.bins, density=self._density)
         self.x = [(this + self.x[i + 1]) / 2. for i,
                   this in enumerate(self.x[0:-1])]
 
@@ -216,6 +225,7 @@ class Fitter(object):
     def hist(self):
         """Draw normed histogram of the data using :attr:`bins`
 
+
         .. plot::
 
             >>> from scipy import stats
@@ -225,10 +235,10 @@ class Fitter(object):
             >>> fitter.Fitter(data).hist()
 
         """
-        _ = pylab.hist(self._data, bins=self.bins, density=True)
+        _ = pylab.hist(self._data, bins=self.bins, density=self._density)
         pylab.grid(True)
 
-    def fit(self):
+    def fit(self, amp=1):
         r"""Loop over distributions and find best parameter to fit the data for each
 
         When a distribution is fitted onto the data, we populate a set of

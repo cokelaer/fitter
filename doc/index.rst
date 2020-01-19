@@ -5,18 +5,22 @@ FITTER documentation
 #############################
 
 
+.. raw:: html
 
-.. image:: https://badge.fury.io/py/fitter.png
-    :target: https://pypi.python.org/pypi/fitter
+     <div style="width:80%"><p>
+     <a href="https://pypi.python.org/pypi/fitter">
+     <img src="https://badge.fury.io/py/fitter.svg"></a>
 
-.. image:: https://secure.travis-ci.org/cokelaer/fitter.png
-    :target: http://travis-ci.org/cokelaer/fitter
+     <a href="https://travis-ci.org/cokelaer/fitter">
+     <img src="https://travis-ci.org/cokelaer/fitter.png"></a>
 
-.. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
-    :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
+     <a href="https://coveralls.io/r/cokelaer/fitter?branch=master">
+     <img src="https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master"></a>
 
-.. image:: https://landscape.io/github/cokelaer/fitter/master/landscape.png
-    :target: https://landscape.io/github/cokelaer/fitter/master
+     </p>
+     </div>
+
+
 
 
 

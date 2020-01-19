@@ -58,7 +58,7 @@ Now, without any knowledge about the distribution or its parameter, what is the 
     :target: http://pythonhosted.org/fitter/_images/index-1.png
 
 
-See the `online <http://pythonhosted.org/fitter/>`_ documentation for details.
+See the `online <http://fitter.readthedocs.io/>`_ documentation for details.
 
 
 

@@ -5,7 +5,7 @@ Change Log
 **1.2**
 
 * Fixed the version. Previous version switched from 1.0.9 to 1.1.11. To start a
-fresh version, we increase to 1.2.0
+  fresh version, we increase to 1.2.0
 * Merged pull request required by bioconda
 * Merged pull request related to implementation of AIC/BIC/KL criteria
   (https://github.com/cokelaer/fitter/pull/19). 
@@ -13,6 +13,7 @@ fresh version, we increase to 1.2.0
 * Implement two functions to get all distributions, or a list of common
   distributions to help users decreading computational time 
   (https://github.com/cokelaer/fitter/issues/20). Also added a FAQS section.
+* travis tested Python 3.6 and 3.7 (not 3.5 anymore)
 
 **1.1**
 

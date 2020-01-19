@@ -4,7 +4,9 @@
 FITTER documentation
 #############################
 
-.. image:: https://badge.fury.io/py/fitter.svg
+
+
+.. image:: https://badge.fury.io/py/fitter.png
     :target: https://pypi.python.org/pypi/fitter
 
 .. image:: https://secure.travis-ci.org/cokelaer/fitter.png

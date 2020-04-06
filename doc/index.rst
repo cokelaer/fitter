@@ -17,6 +17,10 @@ FITTER documentation
      <a href="https://coveralls.io/r/cokelaer/fitter?branch=master">
      <img src="https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master"></a>
 
+    <a href="http://readthedocs.org/projects/fitter/badge/?version=master>
+        <img src="http://bioservices.readthedocs.org/en/master/?badge=master"></a>
+
+
      </p>
      </div>
 

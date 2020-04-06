@@ -13,6 +13,10 @@ FITTER documentation
 .. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
     :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
 
+.. image:: http://readthedocs.org/projects/fitter/badge/?version=master
+    :target: http://fitter.readthedocs.org/en/master/?badge=master
+    :alt: Documentation Status
+
 
 Compatible with Python 2.7 and 3.5, 3.6 (3.4 and 3.7 most probably but not
 tested on travis)

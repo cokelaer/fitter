@@ -17,8 +17,8 @@ FITTER documentation
      <a href="https://coveralls.io/r/cokelaer/fitter?branch=master">
      <img src="https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master"></a>
 
-    <a href="http://readthedocs.org/projects/fitter/badge/?version=master>
-        <img src="http://bioservices.readthedocs.org/en/master/?badge=master"></a>
+    <a href="https://fitter.readthedocs.org/">
+    <img src="https://readthedocs.org/projects/fitter/badge/?version=latest"></a>
 
 
      </p>
@@ -28,8 +28,7 @@ FITTER documentation
 
 
 
-Compatible with Python 2.7, 3.5 and 3.6 (most probably 3.4 and 3.7 as well but
-not tested on travis)
+Compatible with Python 2.7, 3.6 and 3.7 (Travis tests)
 
 
 What is it ?

@@ -128,7 +128,29 @@ but you may want to plot the gamma distribution yourself. In that case, you will
 HistFit class: fit the density function itself
 =================================================
 
+Sometimes, you only have the distriution itself. For instance::
 
+        import scipy.stats
+        data = [scipy.stats.norm.rvs(2,3.4) for x in  range(10000)]
+        Y, X, _ = hist(data, bins=30)
+
+here we have only access to Y (and X).
+
+The histfit module provides the HistFit class to generate plots of your data
+with a fitting curve based on several attempt at fitting your X/Y data with some
+errors on the data set. For instance here below, we introduce 3% of errors and
+fit the data 20 times to see if the fit makes sense.
+ 
+.. plot::
+
+    from fitter import HistFit
+    from pylab import hist
+    import scipy.stats
+    data = [scipy.stats.norm.rvs(2,3.4) for x in  range(10000)]
+    Y, X, _ = hist(data, bins=30)
+    hf = HistFit(X=X, Y=Y)
+    hf.fit(error_rate=0.03, Nfit=20)
+    print(hf.mu, hf.sigma, hf.amplitude)
 
 
 

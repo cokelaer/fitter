@@ -1,6 +1,9 @@
 Change Log
 ##########
 
+**1.2.1**
+
+* adding new class called histfit (see documentation)
 
 **1.2**
 

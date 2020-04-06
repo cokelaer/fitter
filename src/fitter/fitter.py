@@ -35,12 +35,13 @@ from scipy.stats import entropy as kl_div
 __all__ = ['get_common_distributions', 'get_distributions', 'Fitter']
 
 
-def get_distributions(): 
+def get_distributions():
     distributions = []
     for this in dir(scipy.stats):
         if "fit" in eval("dir(scipy.stats." + this + ")"):
             distributions.append(this)
     return distributions
+
 
 def get_common_distributions():
     distributions = get_distributions()

@@ -58,6 +58,8 @@ with Python using the **pip** executable::
 Usage
 ##################
 
+Fitter class: find the underlying distribution
+==============================================
 Nothing complicated since there is just one class provided. First, we will need to create some data samples. Let us create
 a sequence of 100000 samples from a gamma distribution::
 
@@ -117,6 +119,13 @@ but you may want to plot the gamma distribution yourself. In that case, you will
     X = linspace(0,10, 10)
     pdf_fitted = dist.pdf(X, *param)
     plot(X, pdf_fitted, 'o-')
+
+
+HistFit class: fit the density function itself
+=================================================
+
+
+
 
 
 

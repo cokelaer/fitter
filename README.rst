@@ -57,6 +57,13 @@ Now, without any knowledge about the distribution or its parameter, what is the 
     f.summary()
 
 
+A standalone application (very simple) is also provided and works with input CSV
+files::
+
+    fitter fitdist data.csv --column-number 1 --distributions gamma,normal
+
+It creates a file called *fitter.png* and a file called  *fitter.log*.
+
 .. image:: http://pythonhosted.org/fitter/_images/index-1.png
     :target: http://pythonhosted.org/fitter/_images/index-1.png
 

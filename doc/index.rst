@@ -41,14 +41,12 @@ A common tasks in data science or statistics it is identify the underlying
 distribution from which your data comes from. Usually, an histogram can give you
 a good idea but there are many distributions in real life. The **fitter** package 
 provides a simple class to figure out from which distribution your data comes from. 
-It uses scipy package to test about 80 distributions and allows you to plot the 
-results to check what is the most probable distribution.
 
 
 Installation
 ###################
 
-**fitter** is a Python package available the Pypi website. It can be installed
+**fitter** is a Python package available on Pypi website. It can be installed
 with Python using the **pip** executable::
 
     pip install fitter
@@ -58,8 +56,22 @@ with Python using the **pip** executable::
     conda install fitter
 
 
+
+
 Usage
 ##################
+
+Standalone
+==========
+
+A standalone application (very simple) is also provided and works with input CSV
+files::
+ 
+    fitter fitdist data.csv --column-number 1 --distributions gamma,normal
+
+It creates a file called fitter.png and a log fitter.log
+
+
 
 Fitter class: find the underlying distribution
 ==============================================
@@ -86,7 +98,7 @@ Now, we may ask ourself (without any knowledge about the distribution or its par
     f.summary()
 
 Here, we restrict the analysis to only 3 distributions by providing the list of
-distributions to considered. If you do not provide that parameter, 80
+distributions to consider. If you do not provide that parameter, 80
 distributions will be considered (the analysis will be longer) and computation
 make take a while to finish.
 

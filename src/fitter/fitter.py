@@ -24,6 +24,7 @@
 import sys
 import threading
 from datetime import datetime
+import logging
 
 import scipy.stats
 import numpy as np
@@ -31,6 +32,8 @@ import pylab
 import pandas as pd
 from scipy.stats import entropy as kl_div
 
+
+logging.getLogger(__name__)
 
 __all__ = ['get_common_distributions', 'get_distributions', 'Fitter']
 
@@ -109,7 +112,7 @@ class Fitter(object):
     """
 
     def __init__(self, data, xmin=None, xmax=None, bins=100,
-                 distributions=None, verbose=True, timeout=30, 
+                 distributions=None, timeout=30, 
                  density=True):
         """.. rubric:: Constructor
 
@@ -126,10 +129,10 @@ class Fitter(object):
             'gamma'). Finally, you may set to 'common' to  include only common
             distributions, which are: cauchy, chi2, expon, exponpow, gamma,
                  lognorm, norm, powerlaw, irayleigh, uniform.
-        :param bool verbose:
         :param timeout: max time for a given distribution. If timeout is
             reached, the distribution is skipped.
 
+        .. versionchanged:: 1.2.1 remove verbose argument, replacedb by logging module.
         .. versionchanged:: 1.0.8 increase timeout from 10 to 30 seconds.
         """
         self.timeout = timeout
@@ -154,7 +157,6 @@ class Fitter(object):
             self.distributions = [distributions]
 
         self.bins = bins
-        self.verbose = verbose
 
         self._alldata = np.array(data)
         if xmin == None:
@@ -239,7 +241,7 @@ class Fitter(object):
         _ = pylab.hist(self._data, bins=self.bins, density=self._density)
         pylab.grid(True)
 
-    def fit(self, amp=1):
+    def fit(self, amp=1, progress=False):
         r"""Loop over distributions and find best parameter to fit the data for each
 
         When a distribution is fitted onto the data, we populate a set of
@@ -253,7 +255,13 @@ class Fitter(object):
         Indices of the dataframes contains the name of the distribution.
 
         """
-        for distribution in self.distributions:
+        import warnings
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+        from easydev import Progress
+        N = len(self.distributions)
+        pb = Progress(N)
+        for i, distribution in enumerate(self.distributions):
             try:
                 # need a subprocess to check time it takes. If too long, skip it
                 dist = eval("scipy.stats." + distribution)
@@ -289,24 +297,24 @@ class Fitter(object):
                 kullback_leibler = kl_div(
                     self.fitted_pdf[distribution], self.y)
 
-                if self.verbose:
-                    print("Fitted {} distribution with error={})".format(
-                          distribution, sq_error))
+                logging.info("Fitted {} distribution with error={})".format(
+                    distribution, sq_error))
 
                 # compute some errors now
                 self._fitted_errors[distribution] = sq_error
                 self._aic[distribution] = aic
                 self._bic[distribution] = bic
                 self._kldiv[distribution] = kullback_leibler
-            except Exception as err:
-                if self.verbose:
-                    print("SKIPPED {} distribution (taking more than {} seconds)".format(distribution,
+            except Exception as err: #pragma: no cover
+                logging.warning("SKIPPED {} distribution (taking more than {} seconds)".format(distribution,
                                                                                          self.timeout))
                 # if we cannot compute the error, set it to large values
                 self._fitted_errors[distribution] = np.inf
                 self._aic[distribution] = np.inf
                 self._bic[distribution] = np.inf
                 self._kldiv[distribution] = np.inf
+            if progress:
+                pb.animate(i+1)
 
         self.df_errors = pd.DataFrame({'sumsquare_error': self._fitted_errors,
                                        'aic': self._aic,
@@ -342,8 +350,8 @@ class Fitter(object):
                 if name in self.fitted_pdf.keys():
                     pylab.plot(
                         self.x, self.fitted_pdf[name], lw=lw, label=name)
-                else:
-                    print("%s was not fitted. no parameters available" % name)
+                else: #pragma: no cover
+                    logger.warning("%s was not fitted. no parameters available" % name)
         pylab.grid(True)
         pylab.legend()
 
@@ -372,7 +380,7 @@ class Fitter(object):
         try:
             names = self.df_errors.sort_values(
                 by=method).index[0:Nbest]
-        except:
+        except: #pragma: no cover
             names = self.df_errors.sort(method).index[0:Nbest]
         return self.df_errors.loc[names]
 
@@ -392,10 +400,10 @@ class Fitter(object):
             def run(self):
                 try:
                     self.result = func(args, **kwargs)
-                except Exception as err:
+                except Exception as err: #pragma: no cover
                     self.exc_info = sys.exc_info()
 
-            def suicide(self):
+            def suicide(self): # pragma: no cover
                 raise RuntimeError('Stop has been called')
 
         it = InterruptableThread()
@@ -405,11 +413,11 @@ class Fitter(object):
         ended_at = datetime.now()
         diff = ended_at - started_at
 
-        if it.exc_info[0] is not None:  # if there were any exceptions
+        if it.exc_info[0] is not None:  #pragma: no cover ;  if there were any exceptions
             a, b, c = it.exc_info
             raise Exception(a, b, c)  # communicate that to caller
 
-        if it.isAlive():
+        if it.isAlive(): #pragma: no cover
             it.suicide()
             raise RuntimeError
         else:

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 _MAJOR               = 1
 _MINOR               = 2
-_MICRO               = 1
+_MICRO               = 2
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -52,6 +52,12 @@ setup(
     package_dir = {'':'src'},
     packages = ['fitter'],
     install_requires = open("requirements.txt").read(),
+    entry_points = {
+        'console_scripts':[
+           'fitter=fitter.main:main', 
+        ]
+    },
+
 )
 
 

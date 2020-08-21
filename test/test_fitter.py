@@ -26,7 +26,7 @@ def test_fitter():
 
 
     f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'])
-    f.fit()
+    f.fit(progress=True)
     f.summary()
     assert f.xmin == 1
     assert f.xmax == 3

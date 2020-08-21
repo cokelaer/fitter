@@ -1,5 +1,6 @@
+easydev
 numpy
 matplotlib
 scipy>=0.18
 pandas
-
+click

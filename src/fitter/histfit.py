@@ -5,6 +5,7 @@ from pylab import mean, sqrt, std
 
 __all__ = ['HistFit']
 
+
 class HistFit():
     """Plot the histogram of the data (barplot) and the fitted histogram.
 
@@ -100,7 +101,7 @@ class HistFit():
         pylab.bar(self.X, self.Y, width=0.85, ec="k")
 
         for x in range(Nfit):
-            # 10% error on the data to add errors 
+            # 5% error on the data to add errors 
             self.E = [scipy.stats.norm.rvs(0, error_rate) for y in self.Y]
             #[scipy.stats.norm.rvs(0, self.std_data * error_rate) for x in range(self.N)]
             self.result = scipy.optimize.least_squares(self.func, 
@@ -112,8 +113,6 @@ class HistFit():
             self.sigmas.append(sigma)
             self.amplitudes.append(amplitude)
             self.mus.append(mu)
-
-
             self.fits.append(amplitude * scipy.stats.norm.pdf(self.X, mu,sigma))
 
         self.sigma = mean(self.sigmas)

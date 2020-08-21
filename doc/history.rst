@@ -1,6 +1,12 @@
 Change Log
 ##########
 
+**1.2.2**
+
+* remove vervose arguments in Fitter class. Using the logging module instead
+* the Fitte.fit has now a progress bar
+* add a standalone application called ... fitter (see the doc)
+
 **1.2.1**
 
 * adding new class called histfit (see documentation)

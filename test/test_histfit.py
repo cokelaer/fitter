@@ -18,7 +18,7 @@ def test2():
     data = [scipy.stats.norm.rvs(2,3.4) for x in  range(10000)]
     Y, X, _ = hist(data, bins=30)
     hf = HistFit(X=X, Y=Y)
-    hf.fit(error_rate=0.03, Nfit=20)
+    hf.fit(error_rate=0.03, Nfit=20, semilogy=True)
     print(hf.mu, hf.sigma, hf.amplitude)
 
 

@@ -1,5 +1,5 @@
 from fitter import Fitter, get_distributions, get_common_distributions
-
+import numpy as np
 
 def test_dist():
     assert 'gamma' in get_common_distributions()
@@ -65,6 +65,11 @@ def test_others():
     f.fit()
     assert f.df_errors.loc["gamma"].loc['aic'] > 100
 
+def test_n_jobs_api():
+    data = np.random.rand(1000, 3)
+    f = Fitter(data)
+    f.fit(n_jobs=-1)
+    f.fit(n_jobs=1)
 
 
 

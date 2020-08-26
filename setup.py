@@ -3,8 +3,8 @@ __revision__ = "$Id: setup.py 3170 2013-01-16 14:57:19Z cokelaer $"
 from setuptools import setup, find_packages
 
 _MAJOR               = 1
-_MINOR               = 2
-_MICRO               = 3
+_MINOR               = 3
+_MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -12,8 +12,8 @@ metainfo = {
     'authors': {'Cokelaer':('Thomas Cokelaer','cokelaer@gmail.com')},
     'version': version,
     'license' : 'GPL',
-    'download_url' : ['http://github.com/cokelaer/fitter'],
-    'url' : ["http://github.com/cokelaer/fitter"],
+    'download_url' : 'https://github.com/cokelaer/fitter',
+    'url' : "https://github.com/cokelaer/fitter",
     'description':'A tool to fit data to many distributions and best one(s)' ,
     'platforms' : ['Linux', 'Unix', 'MacOsX', 'Windows'],
     'keywords' : ['fit', "distribution", "fitting", "scipy"],

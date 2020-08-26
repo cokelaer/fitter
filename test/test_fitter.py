@@ -1,17 +1,16 @@
-from fitter import Fitter, get_distributions, get_common_distributions
+from fitter import Fitter, get_common_distributions, get_distributions
 
 
 def test_dist():
     assert 'gamma' in get_common_distributions()
-    assert len(get_distributions())> 40
-
+    assert len(get_distributions()) > 40
 
 
 def test_fitter():
-    f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'], xmin=0, xmax=4)
+    f = Fitter([1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3], distributions=['gamma'], xmin=0, xmax=4)
     try:
         f.plot_pdf()
-    except:
+    except Exception:
         pass
     f.fit()
     f.summary()
@@ -24,8 +23,7 @@ def test_fitter():
     assert f.xmin == 1
     assert f.xmax == 3
 
-
-    f = Fitter([1,1,1,2,2,2,2,2,3,3,3,3], distributions=['gamma'])
+    f = Fitter([1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3], distributions=['gamma'])
     f.fit(progress=True)
     f.summary()
     assert f.xmin == 1
@@ -36,12 +34,11 @@ def test_gamma():
     from scipy import stats
     data = stats.gamma.rvs(2, loc=1.5, scale=2, size=10000)
 
-
     f = Fitter(data, bins=100)
-    f.xmin = -10 #should have no effect
-    f.xmax = 1000000 # no effet
-    f.xmin=0.1
-    f.xmax=10
+    f.xmin = -10  # should have no effect
+    f.xmax = 1000000  # no effet
+    f.xmin = 0.1
+    f.xmax = 10
     f.distributions = ['gamma', "alpha"]
     f.fit()
     df = f.summary()
@@ -66,11 +63,9 @@ def test_others():
     assert f.df_errors.loc["gamma"].loc['aic'] > 100
 
 
-
-
-
-
-
-
-
-
+def test_n_jobs_api():
+    from scipy import stats
+    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=1000)
+    f = Fitter(data, distributions="common")
+    f.fit(n_jobs=-1)
+    f.fit(n_jobs=1)

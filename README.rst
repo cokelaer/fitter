@@ -36,10 +36,31 @@ Installation
 
     pip install fitter
 
+**fitter** is also available on **conda** (bioconda channel)::
+ 
+     conda install fitter
+
+And as a singularity file in `damona <https://damona.readthedocs.io>`::
+
+    pip install damona
+    damona install fitter
+
 
 Usage
 ##################
 
+standalone
+===========
+
+A standalone application (very simple) is also provided and works with input CSV
+files::
+  
+    fitter fitdist data.csv --column-number 1 --distributions gamma,normal
+ 
+It creates a file called fitter.png and a log fitter.log
+
+From Python shell
+==================
 
 First, let us create a data samples with N = 10,000 points from a gamma distribution::
 
@@ -59,19 +80,22 @@ Now, without any knowledge about the distribution or its parameter, what is the 
     f.summary()
 
 
-A standalone application (very simple) is also provided and works with input CSV
-files::
-
-    fitter fitdist data.csv --column-number 1 --distributions gamma,normal
-
-It creates a file called *fitter.png* and a file called  *fitter.log*.
-
 .. image:: http://pythonhosted.org/fitter/_images/index-1.png
     :target: http://pythonhosted.org/fitter/_images/index-1.png
 
 
 See the `online <http://fitter.readthedocs.io/>`_ documentation for details.
 
+
+
+Changelog
+~~~~~~~~~
+========= ========================================================================
+Version   Description
+========= ========================================================================
+1.3.0     * parallel process implemeted https://github.com/cokelaer/fitter/pull/25
+            thanks to @arsenyinfo 
+========= ========================================================================
 
 
 

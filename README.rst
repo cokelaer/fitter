@@ -20,7 +20,7 @@ FITTER documentation
 .. image:: https://zenodo.org/badge/23078551.svg
    :target: https://zenodo.org/badge/latestdoi/23078551
 
-Compatible with Python 2.7 and 3.6 and 3.7 (Travis tests)
+Compatible with Python 3.6, 3.7, and 3.8(Travis tests)
 
 
 What is it ?

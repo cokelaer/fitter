@@ -61,7 +61,7 @@ but you may want to plot the gamma distribution yourself. In that case, you will
 HistFit class: fit the density function itself
 =================================================
 
-Sometimes, you only have the distriution itself. For instance::
+Sometimes, you only have the distribution itself. For instance::
 
         import scipy.stats
         data = [scipy.stats.norm.rvs(2,3.4) for x in  range(10000)]

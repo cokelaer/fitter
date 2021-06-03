@@ -319,7 +319,7 @@ class Fitter(object):
         warnings.filterwarnings("ignore", category=RuntimeWarning)
         
         if progress:
-            self.pb.Progress(len(self.distributions))
+            self.pb = Progress(len(self.distributions))
 
         jobs = (delayed(self._fit_single_distribution)(dist, progress) for dist in self.distributions)
         pool = Parallel(n_jobs=n_jobs, backend='threading')

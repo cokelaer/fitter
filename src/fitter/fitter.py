@@ -183,7 +183,7 @@ class Fitter(object):
         self._bic = {}
         self._kldiv = {}
         self._fit_i = 0  # fit progress
-        self.pb = Progress(len(self.distributions))
+        self.pb = None
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
@@ -317,6 +317,9 @@ class Fitter(object):
         """
         import warnings
         warnings.filterwarnings("ignore", category=RuntimeWarning)
+        
+        if progress:
+            self.pb.Progress(len(self.distributions))
 
         jobs = (delayed(self._fit_single_distribution)(dist, progress) for dist in self.distributions)
         pool = Parallel(n_jobs=n_jobs, backend='threading')

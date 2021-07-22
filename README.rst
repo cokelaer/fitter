@@ -7,7 +7,7 @@ FITTER documentation
 .. image:: https://badge.fury.io/py/fitter.svg
     :target: https://pypi.python.org/pypi/fitter
 
-.. image:: https://secure.travis-ci.com/cokelaer/fitter.png
+.. image:: https://api.travis-ci.com/cokelaer/fitter.svg
     :target: http://travis-ci.com/cokelaer/fitter
 
 .. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 

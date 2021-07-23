@@ -41,7 +41,7 @@ jobs:
     - name: coveralls            
       run: |
         pip install coverage
-        coveralls --service=gihtub
+        coveralls --service=github
       env:
           GITHUB_TOKEN: ${{ github.token }}
           

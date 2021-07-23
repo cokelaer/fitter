@@ -37,3 +37,11 @@ jobs:
         pip install pytest
         pip install pytest-cov
         pytest --cov-report term --cov=fitter 
+
+    - name: coveralls            
+      run: |
+        pip install coverage
+        coveralls --service=gihtub
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+          

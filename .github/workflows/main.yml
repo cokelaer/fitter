@@ -29,7 +29,11 @@ jobs:
       run: |
         conda install -c conda-forge mamba --quiet
         mamba install -c conda-forge --quiet -y --file=requirements.txt --file=requirements_dev.txt
-    
+    - name: Install the package itself
+      run: |
+          pip install .
     - name: Test with pytest
       run: |
-        pytest --cov-report term --cov=fitter
+        pip install pytest
+        pip install pytest-cov
+        pytest --cov-report term --cov=fitter 

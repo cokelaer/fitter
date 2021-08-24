@@ -372,7 +372,13 @@ class Fitter(object):
         # self.df should be sorted, so then us take the first one as the best
         name = self.df_errors.sort_values(method).iloc[0].name
         params = self.fitted_param[name]
-        return {name: params}
+        distribution = getattr(scipy.stats, name)
+        param_names = (distribution.shapes + ', loc, scale').split(', ') if distribution.shapes else ['loc', 'scale']
+        
+        param_dict= {}
+        for d_key, d_val in zip (param_names,params):
+            param_dict[d_key]= d_val
+        return {name:param_dict}
 
     def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error"):
         """Plots the distribution of the data and Nbest distribution

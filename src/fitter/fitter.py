@@ -36,7 +36,7 @@ from scipy.stats import entropy as kl_div
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['get_common_distributions', 'get_distributions', 'Fitter']
+__all__ = ["get_common_distributions", "get_distributions", "Fitter"]
 
 
 def get_distributions():
@@ -50,8 +50,18 @@ def get_distributions():
 def get_common_distributions():
     distributions = get_distributions()
     # to avoid error due to changes in scipy
-    common = ['cauchy', 'chi2', 'expon', 'exponpow', 'gamma',
-              'lognorm', 'norm', 'powerlaw', 'rayleigh', 'uniform']
+    common = [
+        "cauchy",
+        "chi2",
+        "expon",
+        "exponpow",
+        "gamma",
+        "lognorm",
+        "norm",
+        "powerlaw",
+        "rayleigh",
+        "uniform",
+    ]
     common = [x for x in common if x in distributions]
     return common
 
@@ -112,9 +122,16 @@ class Fitter(object):
     the original data by setting xmin to None (same for xmax) or just recreate an instance.
     """
 
-    def __init__(self, data, xmin=None, xmax=None, bins=100,
-                 distributions=None, timeout=30,
-                 density=True):
+    def __init__(
+        self,
+        data,
+        xmin=None,
+        xmax=None,
+        bins=100,
+        distributions=None,
+        timeout=30,
+        density=True,
+    ):
         """.. rubric:: Constructor
 
         :param list data: a numpy array or a list
@@ -187,14 +204,13 @@ class Fitter(object):
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
-        self.y, self.x = np.histogram(
-            self._data, bins=self.bins, density=self._density)
-        self.x = [(this + self.x[i + 1]) / 2. for i,
-                                                  this in enumerate(self.x[0:-1])]
+        self.y, self.x = np.histogram(self._data, bins=self.bins, density=self._density)
+        self.x = [(this + self.x[i + 1]) / 2.0 for i, this in enumerate(self.x[0:-1])]
 
     def _trim_data(self):
-        self._data = self._alldata[np.logical_and(
-            self._alldata >= self._xmin, self._alldata <= self._xmax)]
+        self._data = self._alldata[
+            np.logical_and(self._alldata >= self._xmin, self._alldata <= self._xmax)
+        ]
 
     def _get_xmin(self):
         return self._xmin
@@ -208,8 +224,9 @@ class Fitter(object):
         self._trim_data()
         self._update_data_pdf()
 
-    xmin = property(_get_xmin, _set_xmin,
-                    doc="consider only data above xmin. reset if None")
+    xmin = property(
+        _get_xmin, _set_xmin, doc="consider only data above xmin. reset if None"
+    )
 
     def _get_xmax(self):
         return self._xmax
@@ -223,8 +240,9 @@ class Fitter(object):
         self._trim_data()
         self._update_data_pdf()
 
-    xmax = property(_get_xmax, _set_xmax,
-                    doc="consider only data below xmax. reset if None ")
+    xmax = property(
+        _get_xmax, _set_xmax, doc="consider only data below xmax. reset if None "
+    )
 
     def _load_all_distributions(self):
         """Replace the :attr:`distributions` attribute with all scipy distributions"""
@@ -267,8 +285,7 @@ class Fitter(object):
             self.fitted_pdf[distribution] = pdf_fitted
 
             # calculate error
-            sq_error = pylab.sum(
-                (self.fitted_pdf[distribution] - self.y) ** 2)
+            sq_error = pylab.sum((self.fitted_pdf[distribution] - self.y) ** 2)
 
             # calcualte information criteria
             logLik = np.sum(dist.logpdf(self.x, *param))
@@ -278,11 +295,11 @@ class Fitter(object):
             bic = n * np.log(sq_error / n) + k * np.log(n)
 
             # calcualte kullback leibler divergence
-            kullback_leibler = kl_div(
-                self.fitted_pdf[distribution], self.y)
+            kullback_leibler = kl_div(self.fitted_pdf[distribution], self.y)
 
-            logging.info("Fitted {} distribution with error={})".format(
-                distribution, sq_error))
+            logging.info(
+                "Fitted {} distribution with error={})".format(distribution, sq_error)
+            )
 
             # compute some errors now
             self._fitted_errors[distribution] = sq_error
@@ -290,8 +307,11 @@ class Fitter(object):
             self._bic[distribution] = bic
             self._kldiv[distribution] = kullback_leibler
         except Exception:  # pragma: no cover
-            logging.warning("SKIPPED {} distribution (taking more than {} seconds)".format(distribution,
-                                                                                           self.timeout))
+            logging.warning(
+                "SKIPPED {} distribution (taking more than {} seconds)".format(
+                    distribution, self.timeout
+                )
+            )
             # if we cannot compute the error, set it to large values
             self._fitted_errors[distribution] = np.inf
             self._aic[distribution] = np.inf
@@ -316,18 +336,26 @@ class Fitter(object):
 
         """
         import warnings
+
         warnings.filterwarnings("ignore", category=RuntimeWarning)
-        
+
         if progress:
             self.pb = Progress(len(self.distributions))
 
-        jobs = (delayed(self._fit_single_distribution)(dist, progress) for dist in self.distributions)
-        pool = Parallel(n_jobs=n_jobs, backend='threading')
+        jobs = (
+            delayed(self._fit_single_distribution)(dist, progress)
+            for dist in self.distributions
+        )
+        pool = Parallel(n_jobs=n_jobs, backend="threading")
         _ = pool(jobs)
-        self.df_errors = pd.DataFrame({'sumsquare_error': self._fitted_errors,
-                                       'aic': self._aic,
-                                       'bic': self._bic,
-                                       'kl_div': self._kldiv})
+        self.df_errors = pd.DataFrame(
+            {
+                "sumsquare_error": self._fitted_errors,
+                "aic": self._aic,
+                "bic": self._bic,
+                "kl_div": self._kldiv,
+            }
+        )
 
     def plot_pdf(self, names=None, Nbest=5, lw=2, method="sumsquare_error"):
         """Plots Probability density functions of the distributions
@@ -349,21 +377,19 @@ class Fitter(object):
             pylab.plot(self.x, self.fitted_pdf[names], lw=lw, label=names)
         else:
             try:
-                names = self.df_errors.sort_values(
-                    by=method).index[0:Nbest]
+                names = self.df_errors.sort_values(by=method).index[0:Nbest]
             except Exception:
                 names = self.df_errors.sort(method).index[0:Nbest]
 
             for name in names:
                 if name in self.fitted_pdf.keys():
-                    pylab.plot(
-                        self.x, self.fitted_pdf[name], lw=lw, label=name)
+                    pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
                 else:  # pragma: no cover
                     logger.warning("%s was not fitted. no parameters available" % name)
         pylab.grid(True)
         pylab.legend()
 
-    def get_best(self, method='sumsquare_error'):
+    def get_best(self, method="sumsquare_error"):
         """Return best fitted distribution and its parameters
 
         a dictionary with one key (the distribution name) and its parameters
@@ -373,17 +399,19 @@ class Fitter(object):
         name = self.df_errors.sort_values(method).iloc[0].name
         params = self.fitted_param[name]
         distribution = getattr(scipy.stats, name)
-        param_names = (distribution.shapes + ', loc, scale').split(', ') if distribution.shapes else ['loc', 'scale']
-        
-        param_dict= {}
-        for d_key, d_val in zip (param_names,params):
-            param_dict[d_key]= d_val
-        return {name:param_dict}
+        param_names = (
+            (distribution.shapes + ", loc, scale").split(", ")
+            if distribution.shapes
+            else ["loc", "scale"]
+        )
+
+        param_dict = {}
+        for d_key, d_val in zip(param_names, params):
+            param_dict[d_key] = d_val
+        return {name: param_dict}
 
     def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error"):
-        """Plots the distribution of the data and Nbest distribution
-
-        """
+        """Plots the distribution of the data and Nbest distribution"""
         if plot:
             pylab.clf()
             self.hist()
@@ -392,8 +420,7 @@ class Fitter(object):
 
         Nbest = min(Nbest, len(self.distributions))
         try:
-            names = self.df_errors.sort_values(
-                by=method).index[0:Nbest]
+            names = self.df_errors.sort_values(by=method).index[0:Nbest]
         except:  # pragma: no cover
             names = self.df_errors.sort(method).index[0:Nbest]
         return self.df_errors.loc[names]
@@ -419,7 +446,7 @@ class Fitter(object):
                     self.exc_info = sys.exc_info()
 
             def suicide(self):  # pragma: no cover
-                raise RuntimeError('Stop has been called')
+                raise RuntimeError("Stop has been called")
 
         it = InterruptableThread()
         it.start()
@@ -428,7 +455,9 @@ class Fitter(object):
         ended_at = datetime.now()
         diff = ended_at - started_at
 
-        if it.exc_info[0] is not None:  # pragma: no cover ;  if there were any exceptions
+        if (
+            it.exc_info[0] is not None
+        ):  # pragma: no cover ;  if there were any exceptions
             a, b, c = it.exc_info
             raise Exception(a, b, c)  # communicate that to caller
 

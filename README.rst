@@ -9,7 +9,6 @@ FITTER documentation
 
 .. image:: https://github.com/cokelaer/fitter/actions/workflows/main.yml/badge.svg?branch=master
     :target: https://github.com/cokelaer/fitter/actions/workflows/main.yml
-    
 
 .. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
     :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
@@ -21,13 +20,15 @@ FITTER documentation
 .. image:: https://zenodo.org/badge/23078551.svg
    :target: https://zenodo.org/badge/latestdoi/23078551
 
-Compatible with Python 3.6, 3.7, and 3.8
+Compatible with Python 3.6, 3.7, and 3.8, 3.9
 
 
 What is it ?
 ################
 
-**fitter** package provides a simple class to identify the distribution from which a data samples is generated from. It uses 80 distributions from Scipy and allows you to plot the results to check what is the most probable distribution and the best parameters.
+**fitter** package provides a simple class to identify the distribution from which a data samples 
+is generated from. It uses 80 distributions from Scipy and allows you to plot the results to check 
+what is the most probable distribution and the best parameters.
 
 
 Installation
@@ -94,6 +95,11 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.4.0     * get_best function returns now returns the parameters as a dictionary 
+            of parameter names and their values rather than just a list of
+            values (https://github.com/cokelaer/fitter/issues/23) thanks to 
+            contributor @kabirmdasraful
+          * 
 1.3.0     * parallel process implemented https://github.com/cokelaer/fitter/pull/25
             thanks to @arsenyinfo 
 1.2.3     * remove vervose arguments in Fitter class. Using the logging module 

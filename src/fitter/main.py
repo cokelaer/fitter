@@ -29,57 +29,62 @@ import pathlib
 
 __all__ = ["main"]
 
-from  fitter import version
+from fitter import version
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=version)
-def main(): #pragma: no cover
+def main():  # pragma: no cover
     """This is the main help"""
     pass
 
 
 @main.command()
-@click.argument('filename', type=click.STRING)
-@click.option('--column-number', type=click.INT, default=1) 
-@click.option('--delimiter', type=click.STRING, default=",",
-    help="look at the first column")
-@click.option('--distributions', type=click.STRING, default="gamma,beta",
-    help="llist of distribution")
-@click.option('--tag', type=click.STRING, default="fitter",
-    help="tag to name output files")
-@click.option('--progress/--no-progress', default=True)
-@click.option('--verbose/--no-verbose', default=True)
-
+@click.argument("filename", type=click.STRING)
+@click.option("--column-number", type=click.INT, default=1)
+@click.option(
+    "--delimiter", type=click.STRING, default=",", help="look at the first column"
+)
+@click.option(
+    "--distributions",
+    type=click.STRING,
+    default="gamma,beta",
+    help="llist of distribution",
+)
+@click.option(
+    "--tag", type=click.STRING, default="fitter", help="tag to name output files"
+)
+@click.option("--progress/--no-progress", default=True)
+@click.option("--verbose/--no-verbose", default=True)
 def fitdist(**kwargs):
     """"""
     import csv
-    col = kwargs['column_number']
-    with open(kwargs["filename"], "r") as csvfile:
-        data = csv.reader(csvfile, delimiter=kwargs['delimiter'])
-        data = [float(x[col-1]) for x in data]
 
+    col = kwargs["column_number"]
+    with open(kwargs["filename"], "r") as csvfile:
+        data = csv.reader(csvfile, delimiter=kwargs["delimiter"])
+        data = [float(x[col - 1]) for x in data]
 
     from fitter import Fitter
-    distributions = kwargs['distributions'].split(",")
+
+    distributions = kwargs["distributions"].split(",")
     distributions = [x.strip() for x in distributions]
     fit = Fitter(data, distributions=distributions)
 
-    if kwargs['verbose'] is False:
+    if kwargs["verbose"] is False:
         kwargs["progress"] = False
     fit.fit(progress=kwargs["progress"])
     fit.summary()
-    if kwargs['verbose']:
+    if kwargs["verbose"]:
         print()
     from pylab import savefig
-    if kwargs['verbose']:
-        print("Saved image in fitter.png; use --output-image to change the name")
-    tag = kwargs['tag']
-    savefig("{}.png".format(tag))
 
+    if kwargs["verbose"]:
+        print("Saved image in fitter.png; use --output-image to change the name")
+    tag = kwargs["tag"]
+    savefig("{}.png".format(tag))
 
     best = fit.get_best()
     bestname = list(best.keys())[0]
@@ -91,5 +96,6 @@ def fitdist(**kwargs):
     with open("{}.log".format(tag), "w") as fout:
         fout.write(msg)
 
-if __name__ == "__main__": #pragma: no cover
+
+if __name__ == "__main__":  # pragma: no cover
     main()

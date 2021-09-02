@@ -49,6 +49,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary', 
     'sphinx.ext.coverage',
+    'sphinx.ext.doctest',
     'sphinx.ext.todo',
     #'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',

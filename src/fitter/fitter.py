@@ -410,10 +410,11 @@ class Fitter(object):
             param_dict[d_key] = d_val
         return {name: param_dict}
 
-    def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error"):
+    def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error", clf=True):
         """Plots the distribution of the data and Nbest distribution"""
         if plot:
-            pylab.clf()
+            if clf:
+                pylab.clf()
             self.hist()
             self.plot_pdf(Nbest=Nbest, lw=lw, method=method)
             pylab.grid(True)

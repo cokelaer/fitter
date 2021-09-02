@@ -426,7 +426,7 @@ class Fitter(object):
             a, b, c = it.exc_info
             raise Exception(a, b, c)  # communicate that to caller
 
-        if it.isAlive():  # pragma: no cover
+        if it.is_alive():  # pragma: no cover
             it.suicide()
             raise RuntimeError
         else:

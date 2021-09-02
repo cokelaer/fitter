@@ -95,11 +95,12 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
-1.4.0     * get_best function returns now returns the parameters as a dictionary 
+1.4.0     * get_best function now returns the parameters as a dictionary 
             of parameter names and their values rather than just a list of
             values (https://github.com/cokelaer/fitter/issues/23) thanks to 
             contributor @kabirmdasraful
-          * 
+          * Accepting PR to fix progress bar issue reported in 
+            https://github.com/cokelaer/fitter/pull/37
 1.3.0     * parallel process implemented https://github.com/cokelaer/fitter/pull/25
             thanks to @arsenyinfo 
 1.2.3     * remove vervose arguments in Fitter class. Using the logging module 

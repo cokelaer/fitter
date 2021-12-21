@@ -38,7 +38,7 @@ setup(
     maintainer_email = metainfo['authors']['Cokelaer'][1],
     author           = metainfo['authors']['Cokelaer'][0],
     author_email     = metainfo['authors']['Cokelaer'][1],
-    long_description = open("README.rst").read(),
+    long_description = open("README.rst", encoding="utf-8").read(),
     keywords         = metainfo['keywords'],
     description = metainfo['description'],
     license          = metainfo['license'],
@@ -51,7 +51,7 @@ setup(
     # package installation
     package_dir = {'':'src'},
     packages = ['fitter'],
-    install_requires = open("requirements.txt").read(),
+    install_requires = open("requirements.txt", encoding="utf-8").read(),
     entry_points = {
         'console_scripts':[
            'fitter=fitter.main:main', 

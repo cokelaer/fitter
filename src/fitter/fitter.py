@@ -113,7 +113,7 @@ class Fitter(object):
     :attr:`distributions` with a subset if you want. In order to reload all distributions,
     call :meth:`load_all_distributions`.
 
-    Some distributions do not converge when fitting. There is a timeout of 10 seconds after which
+    Some distributions do not converge when fitting. There is a timeout of 30 seconds after which
     the fitting procedure is cancelled. You can change this :attr:`timeout` attribute if needed.
 
     If the histogram of the data has outlier of very long tails, you may want to increase the

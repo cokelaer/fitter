@@ -289,14 +289,14 @@ class Fitter(object):
             # calculate error
             sq_error = pylab.sum((self.fitted_pdf[distribution] - self.y) ** 2)
 
-            # calcualte information criteria
+            # calculate information criteria
             logLik = np.sum(dist.logpdf(self.x, *param))
             k = len(param[:])
             n = len(self._data)
             aic = 2 * k - 2 * logLik
             bic = n * np.log(sq_error / n) + k * np.log(n)
 
-            # calcualte kullback leibler divergence
+            # calculate kullback leibler divergence
             kullback_leibler = kl_div(self.fitted_pdf[distribution], self.y)
 
             # calculate goodness-of-fit statistic

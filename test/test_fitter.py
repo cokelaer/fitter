@@ -36,7 +36,7 @@ def test_gamma():
 
     f = Fitter(data, bins=100)
     f.xmin = -10  # should have no effect
-    f.xmax = 1000000  # no effet
+    f.xmax = 1000000  # no effect
     f.xmin = 0.1
     f.xmax = 10
     f.distributions = ['gamma', "alpha"]

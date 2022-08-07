@@ -32,7 +32,7 @@ import pylab
 import scipy.stats
 from easydev import Progress
 from joblib import Parallel, delayed
-from scipy.stats import entropy as kl_div
+from scipy.stats import entropy as kl_div, kstest
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +199,8 @@ class Fitter(object):
         self._aic = {}
         self._bic = {}
         self._kldiv = {}
+        self._ks_stat = {}
+        self._ks_pval = {}
         self._fit_i = 0  # fit progress
         self.pb = None
 
@@ -297,6 +299,10 @@ class Fitter(object):
             # calcualte kullback leibler divergence
             kullback_leibler = kl_div(self.fitted_pdf[distribution], self.y)
 
+            # calculate goodness-of-fit statistic
+            dist_fitted = dist(*param)
+            ks_stat, ks_pval = kstest(self._data, dist_fitted.cdf)
+
             logging.info(
                 "Fitted {} distribution with error={})".format(distribution, sq_error)
             )
@@ -306,6 +312,8 @@ class Fitter(object):
             self._aic[distribution] = aic
             self._bic[distribution] = bic
             self._kldiv[distribution] = kullback_leibler
+            self._ks_stat[distribution] = ks_stat
+            self._ks_pval[distribution] = ks_pval
         except Exception:  # pragma: no cover
             logging.warning(
                 "SKIPPED {} distribution (taking more than {} seconds)".format(
@@ -354,6 +362,8 @@ class Fitter(object):
                 "aic": self._aic,
                 "bic": self._bic,
                 "kl_div": self._kldiv,
+                "ks_statistic": self._ks_stat,
+                "ks_pvalue": self._ks_pval
             }
         )
 

@@ -83,8 +83,10 @@ Now, without any knowledge about the distribution or its parameter, what is the 
 
 See the `online <http://fitter.readthedocs.io/>`_ documentation for details.
 
+
 Contributors
-############
+=============
+
 
 Setting up and maintaining Fitter has been possible thanks to users and contributors.
 Thanks to all:

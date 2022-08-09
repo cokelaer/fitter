@@ -7,11 +7,11 @@ FITTER documentation
 .. image:: https://badge.fury.io/py/fitter.svg
     :target: https://pypi.python.org/pypi/fitter
 
-.. image:: https://github.com/cokelaer/fitter/actions/workflows/main.yml/badge.svg?branch=master
+.. image:: https://github.com/cokelaer/fitter/actions/workflows/main.yml/badge.svg?branch=main
     :target: https://github.com/cokelaer/fitter/actions/workflows/main.yml
 
-.. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=master 
-    :target: https://coveralls.io/r/cokelaer/fitter?branch=master 
+.. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=main
+    :target: https://coveralls.io/r/cokelaer/fitter?branch=main
 
 .. image:: http://readthedocs.org/projects/fitter/badge/?version=latest
     :target: http://fitter.readthedocs.org/en/latest/?badge=latest
@@ -95,6 +95,11 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.4.1     * Update timeout in docs from 10 to 30 seconds by @mpadge in 
+            https://github.com/cokelaer/fitter/pull/47
+          * Add Kolmogorov-Smirnov goodness-of-fit statistic by @lahdjirayhan in 
+            https://github.com/cokelaer/fitter/pull/58
+          * switch branch from master to main
 1.4.0     * get_best function now returns the parameters as a dictionary 
             of parameter names and their values rather than just a list of
             values (https://github.com/cokelaer/fitter/issues/23) thanks to 

@@ -42,11 +42,6 @@ Installation
  
      conda install fitter
 
-And as a singularity file in `damona <https://damona.readthedocs.io>`::
-
-    pip install damona
-    damona install fitter
-
 
 Usage
 ##################

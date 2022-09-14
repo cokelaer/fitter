@@ -22,10 +22,6 @@ FITTER documentation
 
 Compatible with Python 3.6, 3.7, and 3.8, 3.9
 
-.. image:: https://raw.githubusercontent.com/cokelaer/fitter/main/doc/_static/fitter_256x256.png
-    :target: https://raw.githubusercontent.com/cokelaer/fitter/main/doc/_static/fitter_256x256.png
-
-
 
 What is it ?
 ################

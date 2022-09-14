@@ -84,9 +84,7 @@ class HistFit:
 
             self.N = len(self.X)
             self.guess_mean = self.X[int(self.N / 2)]
-            self.guess_std = sqrt(sum((self.X - mean(self.X)) ** 2) / self.N) / (
-                sqrt(2 * 3.14)
-            )
+            self.guess_std = sqrt(sum((self.X - mean(self.X)) ** 2) / self.N) / (sqrt(2 * 3.14))
             self.guess_amp = 1.0
 
         self.func = self._func_normal
@@ -112,16 +110,10 @@ class HistFit:
             # 5% error on the data to add errors
             self.E = [scipy.stats.norm.rvs(0, error_rate) for y in self.Y]
             # [scipy.stats.norm.rvs(0, self.std_data * error_rate) for x in range(self.N)]
-            self.result = scipy.optimize.least_squares(
-                self.func, (self.guess_mean, self.guess_std, self.guess_amp)
-            )
+            self.result = scipy.optimize.least_squares(self.func, (self.guess_mean, self.guess_std, self.guess_amp))
 
             mu, sigma, amplitude = self.result["x"]
-            pylab.plot(
-                self.X,
-                amplitude * scipy.stats.norm.pdf(self.X, mu, sigma),
-                **error_kwargs
-            )
+            pylab.plot(self.X, amplitude * scipy.stats.norm.pdf(self.X, mu, sigma), **error_kwargs)
             self.sigmas.append(sigma)
             self.amplitudes.append(amplitude)
             self.mus.append(mu)
@@ -131,11 +123,7 @@ class HistFit:
         self.amplitude = mean(self.amplitudes)
         self.mu = mean(self.mus)
 
-        pylab.plot(
-            self.X,
-            self.amplitude * scipy.stats.norm.pdf(self.X, self.mu, self.sigma),
-            **fit_kwargs
-        )
+        pylab.plot(self.X, self.amplitude * scipy.stats.norm.pdf(self.X, self.mu, self.sigma), **fit_kwargs)
         if semilogy:
             pylab.semilogy()
         pylab.grid()
@@ -150,11 +138,7 @@ class HistFit:
         pylab.fill_between(self.X, M - S, M + S, color="gray", alpha=0.5)
         # pylab.plot(self.X, M-S, color="k")
         # pylab.plot(self.X, M+S, color="k")
-        pylab.plot(
-            self.X,
-            self.amplitude * scipy.stats.norm.pdf(self.X, self.mu, self.sigma),
-            **fit_kwargs
-        )
+        pylab.plot(self.X, self.amplitude * scipy.stats.norm.pdf(self.X, self.mu, self.sigma), **fit_kwargs)
         pylab.grid()
 
         return self.mu, self.sigma, self.amplitude
@@ -162,6 +146,4 @@ class HistFit:
     def _func_normal(self, param):
         # amplitude is supposed to be 1./(np.sqrt(2*np.pi)*sigma)* if normalised
         mu, sigma, A = param
-        return sum(
-            (A * scipy.stats.norm.pdf(self.X, mu, sigma) - (self.Y + self.E)) ** 2
-        )
+        return sum((A * scipy.stats.norm.pdf(self.X, mu, sigma) - (self.Y + self.E)) ** 2)

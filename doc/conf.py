@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -25,7 +24,7 @@ import pkg_resources
 version = pkg_resources.require("fitter")[0].version
 
 project = 'fitter'
-copyright = '2019, Thomas Cokelaer'
+copyright = '2019-2022, Thomas Cokelaer'
 author = 'Thomas Cokelaer'
 
 # The short X.Y version
@@ -51,7 +50,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
-    #'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'matplotlib.sphinxext.plot_directive',
@@ -111,6 +109,8 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
+html_logo = "_static/fitter_256x256.png"
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

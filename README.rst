@@ -22,6 +22,10 @@ FITTER documentation
 
 Compatible with Python 3.6, 3.7, and 3.8, 3.9
 
+.. image:: https://raw.githubusercontent.com/cokelaer/fitter/main/doc/_static/fitter_256x256.png
+    :target: https://raw.githubusercontent.com/cokelaer/fitter/main/doc/_static/fitter_256x256.png
+
+
 
 What is it ?
 ################
@@ -102,6 +106,8 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.5.0     * removed easydev and replaced by tqdm for progress bar
+          * progressbar from tqdm also allows replacement of joblib need
 1.4.1     * Update timeout in docs from 10 to 30 seconds by @mpadge in 
             https://github.com/cokelaer/fitter/pull/47
           * Add Kolmogorov-Smirnov goodness-of-fit statistic by @lahdjirayhan in 

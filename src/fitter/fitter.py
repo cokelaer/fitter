@@ -1,6 +1,6 @@
 #  This file is part of the fitter software
 #
-#  Copyright (c) 2014
+#  Copyright (c) 2014-2022
 #
 #  File author(s): Thomas Cokelaer <cokelaer@gmail.com>
 #
@@ -27,8 +27,7 @@ import numpy as np
 import pandas as pd
 import pylab
 import scipy.stats
-from easydev import Progress
-from joblib import Parallel, delayed
+from tqdm import tqdm
 from scipy.stats import entropy as kl_div, kstest
 
 logger = logging.getLogger(__name__)
@@ -199,7 +198,7 @@ class Fitter(object):
         self._ks_stat = {}
         self._ks_pval = {}
         self._fit_i = 0  # fit progress
-        self.pb = None
+        #self.pb = None
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
@@ -207,9 +206,7 @@ class Fitter(object):
         self.x = [(this + self.x[i + 1]) / 2.0 for i, this in enumerate(self.x[0:-1])]
 
     def _trim_data(self):
-        self._data = self._alldata[
-            np.logical_and(self._alldata >= self._xmin, self._alldata <= self._xmax)
-        ]
+        self._data = self._alldata[np.logical_and(self._alldata >= self._xmin, self._alldata <= self._xmax)]
 
     def _get_xmin(self):
         return self._xmin
@@ -223,9 +220,7 @@ class Fitter(object):
         self._trim_data()
         self._update_data_pdf()
 
-    xmin = property(
-        _get_xmin, _set_xmin, doc="consider only data above xmin. reset if None"
-    )
+    xmin = property(_get_xmin, _set_xmin, doc="consider only data above xmin. reset if None")
 
     def _get_xmax(self):
         return self._xmax
@@ -239,9 +234,7 @@ class Fitter(object):
         self._trim_data()
         self._update_data_pdf()
 
-    xmax = property(
-        _get_xmax, _set_xmax, doc="consider only data below xmax. reset if None "
-    )
+    xmax = property(_get_xmax, _set_xmax, doc="consider only data below xmax. reset if None ")
 
     def _load_all_distributions(self):
         """Replace the :attr:`distributions` attribute with all scipy distributions"""
@@ -263,7 +256,7 @@ class Fitter(object):
         _ = pylab.hist(self._data, bins=self.bins, density=self._density)
         pylab.grid(True)
 
-    def _fit_single_distribution(self, distribution, progress: bool):
+    def _fit_single_distribution(self, distribution):
         try:
             # need a subprocess to check time it takes. If too long, skip it
             dist = eval("scipy.stats." + distribution)
@@ -300,9 +293,7 @@ class Fitter(object):
             dist_fitted = dist(*param)
             ks_stat, ks_pval = kstest(self._data, dist_fitted.cdf)
 
-            logging.info(
-                "Fitted {} distribution with error={})".format(distribution, sq_error)
-            )
+            logging.info("Fitted {} distribution with error={})".format(distribution, sq_error))
 
             # compute some errors now
             self._fitted_errors[distribution] = sq_error
@@ -312,21 +303,17 @@ class Fitter(object):
             self._ks_stat[distribution] = ks_stat
             self._ks_pval[distribution] = ks_pval
         except Exception:  # pragma: no cover
-            logging.warning(
-                "SKIPPED {} distribution (taking more than {} seconds)".format(
-                    distribution, self.timeout
-                )
-            )
+            logging.warning("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
             # if we cannot compute the error, set it to large values
             self._fitted_errors[distribution] = np.inf
             self._aic[distribution] = np.inf
             self._bic[distribution] = np.inf
             self._kldiv[distribution] = np.inf
-        if progress:
-            self._fit_i += 1
-            self.pb.animate(self._fit_i)
+        #if srogress:
+        #    self._fit_i += 1
+        #    #self.pb.animate(self._fit_i)
 
-    def fit(self, amp=1, progress=False, n_jobs=-1):
+    def fit(self, progress=False, n_jobs=-1):
         r"""Loop over distributions and find best parameter to fit the data for each
 
         When a distribution is fitted onto the data, we populate a set of
@@ -344,15 +331,14 @@ class Fitter(object):
 
         warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        if progress:
-            self.pb = Progress(len(self.distributions))
+        from tqdm.contrib.concurrent import thread_map
 
-        jobs = (
-            delayed(self._fit_single_distribution)(dist, progress)
-            for dist in self.distributions
-        )
-        pool = Parallel(n_jobs=n_jobs, backend="threading")
-        _ = pool(jobs)
+        result = thread_map(self._fit_single_distribution, self.distributions, max_workers=4, disable=not progress)
+
+        #jobs = (delayed(self._fit_single_distribution)(dist, progress) for dist in self.distributions)
+        #pool = Parallel(n_jobs=n_jobs, backend="threading")
+        #_ = pool(jobs)
+
         self.df_errors = pd.DataFrame(
             {
                 "sumsquare_error": self._fitted_errors,
@@ -360,7 +346,7 @@ class Fitter(object):
                 "bic": self._bic,
                 "kl_div": self._kldiv,
                 "ks_statistic": self._ks_stat,
-                "ks_pvalue": self._ks_pval
+                "ks_pvalue": self._ks_pval,
             }
         )
 
@@ -406,11 +392,7 @@ class Fitter(object):
         name = self.df_errors.sort_values(method).iloc[0].name
         params = self.fitted_param[name]
         distribution = getattr(scipy.stats, name)
-        param_names = (
-            (distribution.shapes + ", loc, scale").split(", ")
-            if distribution.shapes
-            else ["loc", "scale"]
-        )
+        param_names = (distribution.shapes + ", loc, scale").split(", ") if distribution.shapes else ["loc", "scale"]
 
         param_dict = {}
         for d_key, d_val in zip(param_names, params):
@@ -463,9 +445,7 @@ class Fitter(object):
         ended_at = datetime.now()
         diff = ended_at - started_at
 
-        if (
-            it.exc_info[0] is not None
-        ):  # pragma: no cover ;  if there were any exceptions
+        if it.exc_info[0] is not None:  # pragma: no cover ;  if there were any exceptions
             a, b, c = it.exc_info
             raise Exception(a, b, c)  # communicate that to caller
 

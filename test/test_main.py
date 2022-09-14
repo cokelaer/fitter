@@ -1,9 +1,9 @@
 import pytest
 from pathlib import Path
-from easydev import TempFile
 import subprocess
 from scipy import stats
 from fitter.main import fitdist
+from fitter.main import show_distributions
 
 @pytest.fixture
 def setup_teardown():
@@ -36,4 +36,7 @@ def test_main_app(setup_teardown):
     assert results.exit_code == 0
 
     results = runner.invoke(fitdist, ['test.csv', "--progress", "--column-number", 1])
+    assert results.exit_code == 0
+
+    results = runner.invoke(show_distributions, [])
     assert results.exit_code == 0

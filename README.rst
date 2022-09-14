@@ -102,6 +102,7 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.5.1     * fixed regression putting back joblib
 1.5.0     * removed easydev and replaced by tqdm for progress bar
           * progressbar from tqdm also allows replacement of joblib need
 1.4.1     * Update timeout in docs from 10 to 30 seconds by @mpadge in 

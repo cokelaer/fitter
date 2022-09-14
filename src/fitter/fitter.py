@@ -18,21 +18,60 @@
 .. sectionauthor:: Thomas Cokelaer, Aug 2014-2020
 
 """
-import logging
 import sys
+import contextlib
 import threading
 from datetime import datetime
+
+import logging
 
 import numpy as np
 import pandas as pd
 import pylab
 import scipy.stats
+
+import joblib
+from joblib.parallel import Parallel, delayed
 from tqdm import tqdm
 from scipy.stats import entropy as kl_div, kstest
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["get_common_distributions", "get_distributions", "Fitter"]
+
+
+
+# A solution to wrap joblib parallel call in tqdm from 
+# https://stackoverflow.com/questions/24983493/tracking-progress-of-joblib-parallel-execution/58936697#58936697
+# and https://github.com/louisabraham/tqdm_joblib
+@contextlib.contextmanager
+def tqdm_joblib(*args, **kwargs):
+    """Context manager to patch joblib to report into tqdm progress bar
+    given as argument"""
+
+    tqdm_object = tqdm(*args, **kwargs)
+
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
+
+
+
+
+
+
 
 
 def get_distributions():
@@ -309,11 +348,8 @@ class Fitter(object):
             self._aic[distribution] = np.inf
             self._bic[distribution] = np.inf
             self._kldiv[distribution] = np.inf
-        #if srogress:
-        #    self._fit_i += 1
-        #    #self.pb.animate(self._fit_i)
 
-    def fit(self, progress=False, n_jobs=-1):
+    def fit(self, progress=False, n_jobs=-1, max_workers=-1):
         r"""Loop over distributions and find best parameter to fit the data for each
 
         When a distribution is fitted onto the data, we populate a set of
@@ -331,13 +367,10 @@ class Fitter(object):
 
         warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        from tqdm.contrib.concurrent import thread_map
+        N = len(self.distributions)
+        with tqdm_joblib(desc=f"Fitting {N} distributions", total=N) as progress_bar:
+            Parallel(n_jobs=max_workers, backend='threading')(delayed(self._fit_single_distribution)(dist) for dist in self.distributions)
 
-        result = thread_map(self._fit_single_distribution, self.distributions, max_workers=4, disable=not progress)
-
-        #jobs = (delayed(self._fit_single_distribution)(dist, progress) for dist in self.distributions)
-        #pool = Parallel(n_jobs=n_jobs, backend="threading")
-        #_ = pool(jobs)
 
         self.df_errors = pd.DataFrame(
             {

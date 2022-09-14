@@ -19,7 +19,6 @@ import os
 import glob
 import json
 import sys
-import colorlog
 import textwrap
 import subprocess
 import click

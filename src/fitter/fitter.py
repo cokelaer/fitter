@@ -332,7 +332,7 @@ class Fitter(object):
             dist_fitted = dist(*param)
             ks_stat, ks_pval = kstest(self._data, dist_fitted.cdf)
 
-            logging.info("Fitted {} distribution with error={})".format(distribution, sq_error))
+            logger.info("Fitted {} distribution with error={})".format(distribution, sq_error))
 
             # compute some errors now
             self._fitted_errors[distribution] = sq_error
@@ -342,7 +342,7 @@ class Fitter(object):
             self._ks_stat[distribution] = ks_stat
             self._ks_pval[distribution] = ks_pval
         except Exception:  # pragma: no cover
-            logging.warning("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
+            logger.warning("SKIPPED {} distribution (taking more than {} seconds)".format(distribution, self.timeout))
             # if we cannot compute the error, set it to large values
             self._fitted_errors[distribution] = np.inf
             self._aic[distribution] = np.inf

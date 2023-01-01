@@ -20,7 +20,7 @@ FITTER documentation
 .. image:: https://zenodo.org/badge/23078551.svg
    :target: https://zenodo.org/badge/latestdoi/23078551
 
-Compatible with Python 3.6, 3.7, and 3.8, 3.9
+Compatible with Python 3.7, and 3.8, 3.9
 
 
 What is it ?
@@ -102,6 +102,7 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.5.2     * PR https://github.com/cokelaer/fitter/pull/74 to fix logger
 1.5.1     * fixed regression putting back joblib
 1.5.0     * removed easydev and replaced by tqdm for progress bar
           * progressbar from tqdm also allows replacement of joblib need

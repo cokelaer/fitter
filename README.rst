@@ -26,10 +26,7 @@ Compatible with Python 3.7, and 3.8, 3.9
 What is it ?
 ################
 
-**fitter** package provides a simple class to identify the distribution from which a data samples 
-is generated from. It uses 80 distributions from Scipy and allows you to plot the results to check 
-what is the most probable distribution and the best parameters.
-
+The **fitter** package is a Python library for fitting probability distributions to data. It provides a simple and intuitive interface for estimating the parameters of different types of distributions, including continuous and discrete distributions. With **fitter**, you can easily fit a variety of distributions to your data and compare the fit of different distributions to choose the best-fitting one. The package is designed to be easy to use and requires minimal setup, making it a useful tool for data scientists and statisticians working with probability distributions.
 
 Installation
 ###################

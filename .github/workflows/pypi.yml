@@ -11,29 +11,35 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@main
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.8
 
     - name: Install package
       run: |
-          pip install build
+          pip install build poetry
 
     - name: Build source tarball
       run: |
           rm -rf dist;
-          python setup.py sdist
-
+          poetry build
+ 
     - name: Publish distribution to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: JRubics/poetry-publish@v1.17
       with:
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
+        pypi_token: ${{ secrets.PYPI_TOKEN }}
+        repository_name: "testpypi"
+        repository_url: "https://test.pypi.org/legacy/"
+        #user: __token__
+        #password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
     - name: Publish distribution to PyPI
       if: startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: JRubics/poetry-publish@v1.17
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        pypi_token: ${{ secrets.PYPI_TOKEN }}
+        repository_name: "pypi"
+        repository_url: "https://pypi.org/legacy/"
+        #user: __token__
+        #password: ${{ secrets.PYPI_API_TOKEN }}

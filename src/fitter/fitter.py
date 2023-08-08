@@ -127,15 +127,23 @@ class Fitter(object):
         >>> # fit and plot
         >>> f.fit()
         >>> f.summary()
-                sumsquare_error
-        gamma          0.000095
-        beta           0.000179
-        chi            0.012247
-        cauchy         0.044443
-        anglit         0.051672
-        [5 rows x 1 columns]
 
-    Once the data has been fitted, the :meth:`summary` metod returns a sorted dataframe where the
+                      sumsquare_error     aic            bic     kl_div  ks_statistic  ks_pvalue
+        loggamma            0.001176  995.866732 -159536.164644     inf      0.008459   0.469031
+        gennorm             0.001181  993.145832 -159489.437372     inf      0.006833   0.736164
+        norm                0.001189  992.975187 -159427.247523     inf      0.007138   0.685416
+        truncnorm           0.001189  996.975182 -159408.826771     inf      0.007138   0.685416
+        crystalball         0.001189  996.975078 -159408.821960     inf      0.007138   0.685434
+
+    Once the data has been fitted, the :meth:`summary` method returns a sorted dataframe where 
+    the index represents the distribution names. 
+
+    The AIC is computed using :math:`aic = 2 * k - 2 * log(Lik)`,
+    and the BIC is computed as :math:`k * log(n) - 2 * log(Lik)`.
+
+
+    where Lik is the maximized value of the likelihood function of the model, 
+    n the number of data point and k the number of parameter.
 
     Looping over the 80 distributions in SciPy could takes some times so you can overwrite the
     :attr:`distributions` with a subset if you want. In order to reload all distributions,
@@ -316,7 +324,11 @@ class Fitter(object):
             k = len(param[:])
             n = len(self._data)
             aic = 2 * k - 2 * logLik
-            bic = n * np.log(sq_error / n) + k * np.log(n)
+
+            # special case of gaussian distribution
+            #bic = n * np.log(sq_error / n) + k * np.log(n)
+            # general case:
+            bic = k * pylab.log(n) - 2 * logLik
 
             # calculate kullback leibler divergence
             kullback_leibler = kl_div(self.fitted_pdf[distribution], self.y)
@@ -427,7 +439,7 @@ class Fitter(object):
         return {name: param_dict}
 
     def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error", clf=True):
-        """Plots the distribution of the data and Nbest distribution"""
+        """Plots the distribution of the data and N best distributions"""
         if plot:
             if clf:
                 pylab.clf()

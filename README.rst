@@ -101,6 +101,7 @@ Version   Description
 ========= ==========================================================================
 1.6.0     * for developers: uses pyproject.toml instead of setup.py
           * Fix progress bar fixing https://github.com/cokelaer/fitter/pull/74
+          * Fix BIC formula https://github.com/cokelaer/fitter/pull/77
 1.5.2     * PR https://github.com/cokelaer/fitter/pull/74 to fix logger
 1.5.1     * fixed regression putting back joblib
 1.5.0     * removed easydev and replaced by tqdm for progress bar

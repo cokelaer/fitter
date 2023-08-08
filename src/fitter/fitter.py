@@ -40,8 +40,7 @@ logger = logging.getLogger(__name__)
 __all__ = ["get_common_distributions", "get_distributions", "Fitter"]
 
 
-
-# A solution to wrap joblib parallel call in tqdm from 
+# A solution to wrap joblib parallel call in tqdm from
 # https://stackoverflow.com/questions/24983493/tracking-progress-of-joblib-parallel-execution/58936697#58936697
 # and https://github.com/louisabraham/tqdm_joblib
 @contextlib.contextmanager
@@ -66,12 +65,6 @@ def tqdm_joblib(*args, **kwargs):
     finally:
         joblib.parallel.BatchCompletionCallBack = old_batch_callback
         tqdm_object.close()
-
-
-
-
-
-
 
 
 def get_distributions():
@@ -237,7 +230,7 @@ class Fitter(object):
         self._ks_stat = {}
         self._ks_pval = {}
         self._fit_i = 0  # fit progress
-        #self.pb = None
+        # self.pb = None
 
     def _update_data_pdf(self):
         # histogram retuns X with N+1 values. So, we rearrange the X output into only N
@@ -368,9 +361,10 @@ class Fitter(object):
         warnings.filterwarnings("ignore", category=RuntimeWarning)
 
         N = len(self.distributions)
-        with tqdm_joblib(desc=f"Fitting {N} distributions", total=N) as progress_bar:
-            Parallel(n_jobs=max_workers, backend='threading')(delayed(self._fit_single_distribution)(dist) for dist in self.distributions)
-
+        with tqdm_joblib(desc=f"Fitting {N} distributions", total=N, disable=not progress) as progress_bar:
+            Parallel(n_jobs=max_workers, backend="threading")(
+                delayed(self._fit_single_distribution)(dist) for dist in self.distributions
+            )
 
         self.df_errors = pd.DataFrame(
             {

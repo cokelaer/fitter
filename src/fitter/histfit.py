@@ -7,15 +7,13 @@ __all__ = ["HistFit"]
 
 
 class HistFit:
-    """Plot the histogram of the data (barplot) and the fitted histogram.
+    """Plot the histogram of the data (barplot) and the fitted histogram (gaussian case only)
 
     The input data can be a series. In this case, we compute the histogram.
     Then, we fit a curve on top on the histogram that best fit the histogram.
 
-    If you already have the histogram, you can provide the arguments.
-    In this case, X should be evenly spaced
-
-
+    If you already have the histogram, you can provide the density function..
+    In such case, we assume the data to be evenly spaced from 1 to N.
 
     If you have some data, histogram is computed, then we add some noise during
     the fitting process and repeat the process Nfit=20 times. This gives us a

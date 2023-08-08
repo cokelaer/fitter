@@ -26,7 +26,7 @@ Compatible with Python 3.7, and 3.8, 3.9
 What is it ?
 ################
 
-The **fitter** package is a Python library for fitting probability distributions to data. It provides a simple and intuitive interface for estimating the parameters of different types of distributions, including continuous and discrete distributions. With **fitter**, you can easily fit a variety of distributions to your data and compare the fit of different distributions to choose the best-fitting one. The package is designed to be easy to use and requires minimal setup, making it a useful tool for data scientists and statisticians working with probability distributions.
+The **fitter** package is a Python library used for fitting probability distributions to data. It provides a straightforward and and intuitive interface to estimate parameters for various types of distributions, both continuous and discrete. Using **fitter**, you can easily fit a range of distributions to your data and compare their fit, aiding in the selection of the most suitable distribution. The package is designed to be user-friendly and requires minimal setup, making it a useful tool for data scientists and statisticians working with probability distributions.
 
 Installation
 ###################
@@ -99,6 +99,8 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.6.0     * for developers: uses pyproject.toml instead of setup.py
+          * Fix progress bar fixing https://github.com/cokelaer/fitter/pull/74
 1.5.2     * PR https://github.com/cokelaer/fitter/pull/74 to fix logger
 1.5.1     * fixed regression putting back joblib
 1.5.0     * removed easydev and replaced by tqdm for progress bar

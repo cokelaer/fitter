@@ -40,19 +40,23 @@ def main():  # pragma: no cover
 
 @main.command()
 @click.argument("filename", type=click.STRING)
-@click.option("--column-number", type=click.INT, default=1)
-@click.option("--delimiter", type=click.STRING, default=",", help="look at the first column")
+@click.option("--column-number", type=click.INT, default=1, help="data column to use (first column by default)")
+@click.option("--delimiter", type=click.STRING, default=",", help="column delimiter (comma by default)")
 @click.option(
     "--distributions",
     type=click.STRING,
     default="gamma,beta",
-    help="llist of distribution",
+    help="list of distribution",
 )
 @click.option("--tag", type=click.STRING, default="fitter", help="tag to name output files")
 @click.option("--progress/--no-progress", default=True)
 @click.option("--verbose/--no-verbose", default=True)
 def fitdist(**kwargs):
-    """"""
+    """
+
+    fitter fitdist data.csv
+
+    """
     import csv
 
     col = kwargs["column_number"]
@@ -89,11 +93,12 @@ def fitdist(**kwargs):
     with open("{}.log".format(tag), "w") as fout:
         fout.write(msg)
 
+
 @main.command()
 def show_distributions(**kwargs):
     from fitter import get_distributions
-    print("\n".join(get_distributions()))
 
+    print("\n".join(get_distributions()))
 
 
 if __name__ == "__main__":  # pragma: no cover

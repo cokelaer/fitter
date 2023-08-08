@@ -73,8 +73,10 @@ The histfit module provides the HistFit class to generate plots of your data
 with a fitting curve based on several attempt at fitting your X/Y data with some
 errors on the data set. For instance here below, we introduce 3% of errors and
 fit the data 20 times to see if the fit makes sense.
- 
+
 .. plot::
+    :include-source:
+    :width: 80%
 
     from fitter import HistFit
     from pylab import hist

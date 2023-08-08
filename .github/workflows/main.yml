@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python: [3.7, 3.8, 3.9]
+        python: [3.8, 3.9, '3.10']
       fail-fast: false
 
     steps:
@@ -27,17 +27,13 @@ jobs:
     - name: Install the package itself
       run: |
           pip install poetry
-          poetry install
+          poetry install 
     - name: Test with pytest
       run: |
-        pip install pytest
-        pip install pytest-cov
-        pytest --cov-report term --cov=fitter 
+        poetry run pytest --cov-report term --cov=fitter 
 
-    - name: coveralls            
+    - name: coveralls
       run: |
-        pip install coverage
-        coveralls --service=github
+        poetry run coveralls --service=github
       env:
           GITHUB_TOKEN: ${{ github.token }}
-          

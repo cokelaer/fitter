@@ -1,4 +1,0 @@
-recursive-include src *.py
-include requirements.txt
-include LICENSE
-

@@ -18,24 +18,21 @@
 .. sectionauthor:: Thomas Cokelaer, Aug 2014-2020
 
 """
-import sys
 import contextlib
+import sys
 import threading
 from datetime import datetime
 
-import logging
-
+import joblib
 import numpy as np
 import pandas as pd
 import pylab
 import scipy.stats
-
-import joblib
 from joblib.parallel import Parallel, delayed
+from loguru import logger
+from scipy.stats import entropy as kl_div
+from scipy.stats import kstest
 from tqdm import tqdm
-from scipy.stats import entropy as kl_div, kstest
-
-logger = logging.getLogger(__name__)
 
 __all__ = ["get_common_distributions", "get_distributions", "Fitter"]
 
@@ -135,14 +132,14 @@ class Fitter(object):
         truncnorm           0.001189  996.975182 -159408.826771     inf      0.007138   0.685416
         crystalball         0.001189  996.975078 -159408.821960     inf      0.007138   0.685434
 
-    Once the data has been fitted, the :meth:`summary` method returns a sorted dataframe where 
-    the index represents the distribution names. 
+    Once the data has been fitted, the :meth:`summary` method returns a sorted dataframe where
+    the index represents the distribution names.
 
     The AIC is computed using :math:`aic = 2 * k - 2 * log(Lik)`,
     and the BIC is computed as :math:`k * log(n) - 2 * log(Lik)`.
 
 
-    where Lik is the maximized value of the likelihood function of the model, 
+    where Lik is the maximized value of the likelihood function of the model,
     n the number of data point and k the number of parameter.
 
     Looping over the 80 distributions in SciPy could takes some times so you can overwrite the
@@ -326,7 +323,7 @@ class Fitter(object):
             aic = 2 * k - 2 * logLik
 
             # special case of gaussian distribution
-            #bic = n * np.log(sq_error / n) + k * np.log(n)
+            # bic = n * np.log(sq_error / n) + k * np.log(n)
             # general case:
             bic = k * pylab.log(n) - 2 * logLik
 
@@ -337,7 +334,7 @@ class Fitter(object):
             dist_fitted = dist(*param)
             ks_stat, ks_pval = kstest(self._data, dist_fitted.cdf)
 
-            logger.info("Fitted {} distribution with error={})".format(distribution, sq_error))
+            logger.info("Fitted {} distribution with error={})".format(distribution, round(sq_error, 6)))
 
             # compute some errors now
             self._fitted_errors[distribution] = sq_error

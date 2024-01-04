@@ -36,7 +36,7 @@ Installation
     pip install fitter
 
 **fitter** is also available on **conda** (bioconda channel)::
- 
+
      conda install fitter
 
 
@@ -48,9 +48,9 @@ standalone
 
 A standalone application (very simple) is also provided and works with input CSV
 files::
-  
+
     fitter fitdist data.csv --column-number 1 --distributions gamma,normal
- 
+
 It creates a file called fitter.png and a log fitter.log
 
 From Python shell
@@ -70,7 +70,7 @@ Now, without any knowledge about the distribution or its parameter, what is the 
     f = Fitter(data)
     f.fit()
     # may take some time since by default, all distributions are tried
-    # but you call manually provide a smaller set of distributions 
+    # but you call manually provide a smaller set of distributions
     f.summary()
 
 
@@ -99,6 +99,10 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.7.0     * replace logging with loguru
+          * main application update to add missing --output-image option and use
+            rich_click
+          * replace pkg_resources with importlib
 1.6.0     * for developers: uses pyproject.toml instead of setup.py
           * Fix progress bar fixing https://github.com/cokelaer/fitter/pull/74
           * Fix BIC formula https://github.com/cokelaer/fitter/pull/77
@@ -106,34 +110,34 @@ Version   Description
 1.5.1     * fixed regression putting back joblib
 1.5.0     * removed easydev and replaced by tqdm for progress bar
           * progressbar from tqdm also allows replacement of joblib need
-1.4.1     * Update timeout in docs from 10 to 30 seconds by @mpadge in 
+1.4.1     * Update timeout in docs from 10 to 30 seconds by @mpadge in
             https://github.com/cokelaer/fitter/pull/47
-          * Add Kolmogorov-Smirnov goodness-of-fit statistic by @lahdjirayhan in 
+          * Add Kolmogorov-Smirnov goodness-of-fit statistic by @lahdjirayhan in
             https://github.com/cokelaer/fitter/pull/58
           * switch branch from master to main
-1.4.0     * get_best function now returns the parameters as a dictionary 
+1.4.0     * get_best function now returns the parameters as a dictionary
             of parameter names and their values rather than just a list of
-            values (https://github.com/cokelaer/fitter/issues/23) thanks to 
+            values (https://github.com/cokelaer/fitter/issues/23) thanks to
             contributor @kabirmdasraful
-          * Accepting PR to fix progress bar issue reported in 
+          * Accepting PR to fix progress bar issue reported in
             https://github.com/cokelaer/fitter/pull/37
 1.3.0     * parallel process implemented https://github.com/cokelaer/fitter/pull/25
-            thanks to @arsenyinfo 
-1.2.3     * remove vervose arguments in Fitter class. Using the logging module 
+            thanks to @arsenyinfo
+1.2.3     * remove vervose arguments in Fitter class. Using the logging module
             instead
           * the Fitter.fit has now a progress bar
           * add a standalone application called … fitter (see the doc)
 1.2.2     was not released
 1.2.1     adding new class called histfit (see documentation)
-1.2       * Fixed the version. Previous version switched from 
+1.2       * Fixed the version. Previous version switched from
             1.0.9 to 1.1.11. To start a fresh version, we increase to 1.2.0
           * Merged pull request required by bioconda
-          * Merged pull request related to implementation of 
-            AIC/BIC/KL criteria (https://github.com/cokelaer/fitter/pull/19). 
+          * Merged pull request related to implementation of
+            AIC/BIC/KL criteria (https://github.com/cokelaer/fitter/pull/19).
             This also fixes https://github.com/cokelaer/fitter/issues/9
-          * Implement two functions to get all distributions, or a list of 
-            common distributions to help users decreading computational time 
-            (https://github.com/cokelaer/fitter/issues/20). Also added a FAQS 
+          * Implement two functions to get all distributions, or a list of
+            common distributions to help users decreading computational time
+            (https://github.com/cokelaer/fitter/issues/20). Also added a FAQS
             section.
           * travis tested Python 3.6 and 3.7 (not 3.5 anymore)
 1.1       * Fixed deprecated warning
@@ -144,7 +148,3 @@ Version   Description
 1.0.5      https://github.com/cokelaer/fitter/issues
 1.0.2     add manifest to fix missing source in the pypi repository.
 ========= ==========================================================================
-
-
-
-

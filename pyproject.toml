@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fitter"
-version = "1.6.0"
+version = "1.7.0"
 description = "A tool to fit data to many distributions and get the best one(s)"
 authors = ["Thomas Cokelaer <cokelaer@gmail.com>"]
 license = "GPL"
@@ -17,6 +17,8 @@ classifiers = [
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Information Analysis",
@@ -33,6 +35,8 @@ numpy = ">=1.20"
 pandas = "^2.0.3"
 scipy = ">=0.18"
 tqdm = "^4.65.1"
+loguru = "^0.7.2"
+rich-click = "^1.7.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

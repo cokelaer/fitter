@@ -442,7 +442,6 @@ class Fitter(object):
             param_names = (distribution.shapes + ", loc, scale").split(", ") if distribution.shapes else ["loc", "scale"]
             param_dict = {}
             for d_key, d_val in zip(param_names, params):param_dict[d_key] = d_val
-            print(f"name: {name}, params: {param_dict}")
             return {name: param_dict}
         except:raise Exception("%s was not fitted. no parameters available" % name)
 

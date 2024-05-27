@@ -386,6 +386,7 @@ class Fitter(object):
                 "ks_pvalue": self._ks_pval,
             }
         )
+        self.df_errors.sort_index(inplace=True)
 
     def plot_pdf(self, names=None, Nbest=5, lw=2, method="sumsquare_error"):
         """Plots Probability density functions of the distributions

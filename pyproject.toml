@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fitter"
-version = "1.7.0"
+version = "1.7.1"
 description = "A tool to fit data to many distributions and get the best one(s)"
 authors = ["Thomas Cokelaer <cokelaer@gmail.com>"]
 license = "GPL"

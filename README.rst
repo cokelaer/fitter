@@ -99,6 +99,8 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.7.1     * integrate PR github.com/cokelaer/fitter/pull/100 from @vitorandreazza
+            to speedup multiprocessing run.
 1.7.0     * replace logging with loguru
           * main application update to add missing --output-image option and use
             rich_click

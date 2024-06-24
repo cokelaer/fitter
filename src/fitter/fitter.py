@@ -437,6 +437,30 @@ class Fitter(object):
             param_dict[d_key] = d_val
         return {name: param_dict}
 
+    def _get_params(self, name):
+        try:
+            params = self.fitted_param[name]
+            distribution = getattr(scipy.stats, name)
+            param_names = (distribution.shapes + ", loc, scale").split(", ") if distribution.shapes else ["loc", "scale"]
+            param_dict = {}
+            for d_key, d_val in zip(param_names, params):param_dict[d_key] = d_val
+            return {name: param_dict}
+        except:raise Exception("%s was not fitted. no parameters available" % name)
+
+    def get_params(self, names):
+        """Return list of selected result distributions.
+
+        :param str,list names: names can be single distribution name or a list
+        of distribution names.
+
+        """
+        params = {}
+        if isinstance(names, list):
+            for name in names:
+                params.update(self._get_params(name))
+            return params
+        else: return {_get_params(names)}
+
     def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error", clf=True):
         """Plots the distribution of the data and N best distributions"""
         if plot:

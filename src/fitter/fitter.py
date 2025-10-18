@@ -13,23 +13,27 @@
 #  Package: http://pypi.python.org/fitter
 #
 ##############################################################################
-"""main module of the fitter package
+"""Main module of the fitter package.
+
+This module provides the Fitter class for fitting multiple probability distributions
+to data samples and comparing their goodness of fit using various metrics.
 
 .. sectionauthor:: Thomas Cokelaer, Aug 2014-2020
-
 """
+
+from __future__ import annotations
 
 import contextlib
 import multiprocessing
+from typing import Any
 
 import joblib
 import numpy as np
 import pandas as pd
-import pylab
 import scipy.stats
 from joblib.parallel import Parallel, delayed
 from loguru import logger
-from numba import jit, prange
+from matplotlib import pyplot as plt
 from scipy.stats import entropy as kl_div
 from scipy.stats import kstest
 from tqdm import tqdm
@@ -41,100 +45,66 @@ __all__ = ["Fitter", "get_common_distributions", "get_distributions"]
 # https://stackoverflow.com/questions/24983493/tracking-progress-of-joblib-parallel-execution/58936697#58936697
 # and https://github.com/louisabraham/tqdm_joblib
 @contextlib.contextmanager
-def tqdm_joblib(*args, **kwargs):
-    """Context manager to patch joblib to report into tqdm progress bar
-    given as argument
+def tqdm_joblib(*args: Any, **kwargs: Any) -> Any:
+    """Context manager to patch joblib to report into tqdm progress bar.
+
+    Args:
+        *args: Positional arguments passed to tqdm.
+        **kwargs: Keyword arguments passed to tqdm.
+
+    Yields:
+        tqdm object for progress tracking.
+
     """
-    # Only create progress bar if not disabled (saves overhead when progress tracking is off)
-    disable = kwargs.get('disable', False)
-    tqdm_object = tqdm(*args, **kwargs) if not disable else None
+    tqdm_object = tqdm(*args, **kwargs)
 
-    if not disable:
-        class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
-            def __call__(self, *args, **kwargs):
-                tqdm_object.update(n=self.batch_size)
-                return super().__call__(*args, **kwargs)
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-        old_batch_callback = joblib.parallel.BatchCompletionCallBack
-        joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
-    
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
     try:
         yield tqdm_object
     finally:
-        if not disable:
-            joblib.parallel.BatchCompletionCallBack = old_batch_callback
-            tqdm_object.close()
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
 
 
-def get_distributions(verbose=False):
-    """
-    Discover all available distributions in scipy.stats that have a 'fit' method.
-    
-    Parameters:
-    -----------
-    verbose : bool
-        Whether to print discovery information during execution
-        
+def get_distributions() -> list[str]:
+    """Get all scipy.stats distributions that have a fit method.
+
     Returns:
-    --------
-    list
-        List of distribution names that have a 'fit' method
+        List of distribution names as strings.
+
     """
-    
-    
-    distributions = []
-    skipped = []
-    
-    if verbose:
-        logger.info("Searching for distributions in scipy.stats with a 'fit' method...")
-    
-    for dist_name in dir(scipy.stats):
-        try:
-            # Skip private attributes, functions, and non-distribution objects
-            if dist_name.startswith('_') or dist_name in ['test', 'freeze']:
-                continue
-                
-            # Get the attribute
-            dist_obj = getattr(scipy.stats, dist_name)
-            
-            # Check if it's a distribution-like object with a fit method
-            if hasattr(dist_obj, 'fit'):
-                distributions.append(dist_name)
-                if verbose:
-                    logger.debug(f"Found distribution: {dist_name}")
-            else:
-                skipped.append(dist_name)
-                
-        except Exception as e:
-            # Safely handle any unexpected errors during discovery
-            skipped.append(dist_name)
-            if verbose:
-                logger.warning(f"Error checking {dist_name}: {str(e)}")
-    
-    if verbose:
-        logger.success(f"Found {len(distributions)} distributions with a 'fit' method")
-        
+    # BUGFIX: Replace eval() with getattr() - safer and faster
+    distributions = [
+        name for name in dir(scipy.stats)
+        if hasattr(getattr(scipy.stats, name, None), 'fit')
+    ]
     return distributions
 
 
-def get_common_distributions(verbose=False):
-    """
-    Get a curated list of common distributions that have a 'fit' method.
-    
-    Parameters:
-    -----------
-    verbose : bool
-        Whether to print information during execution
-        
-    Returns:
-    --------
-    list
-        List of common distribution names that have a 'fit' method
-    """
-    from loguru import logger
+def get_common_distributions() -> list[str]:
+    """Get commonly used distributions that are available in scipy.stats.
 
-    # Define the list of common distributions
-    common_distributions = [
+    Returns:
+        List of common distribution names that have fit methods.
+
+    Note:
+        Filters based on scipy version to avoid errors with missing distributions.
+
+    """
+    distributions = get_distributions()
+    # Convert to set for O(1) lookup (much faster than list membership)
+    dist_set = set(distributions)
+    # Common distributions to avoid error due to changes in scipy
+    common = [
         "cauchy",
         "chi2",
         "expon",
@@ -146,20 +116,8 @@ def get_common_distributions(verbose=False):
         "rayleigh",
         "uniform",
     ]
-    
-    # Get all available distributions
-    all_distributions = get_distributions(verbose=False)
-    
-    # Filter to only include distributions that exist in scipy.stats
-    available_common = [dist for dist in common_distributions if dist in all_distributions]
-    
-    if verbose:
-        logger.info(f"Found {len(available_common)} common distributions out of {len(all_distributions)} total")
-        if len(available_common) < len(common_distributions):
-            missing = set(common_distributions) - set(available_common)
-            logger.warning(f"Missing common distributions: {', '.join(missing)}")
-        
-    return available_common
+    # Single-pass filter with set lookup (O(n) instead of O(n²))
+    return [x for x in common if x in dist_set]
 
 
 class Fitter:
@@ -228,14 +186,14 @@ class Fitter:
 
     def __init__(
         self,
-        data,
-        xmin=None,
-        xmax=None,
-        bins=100,
-        distributions=None,
-        timeout=30,
-        density=True,
-    ):
+        data: np.ndarray | list[float],
+        xmin: float | None = None,
+        xmax: float | None = None,
+        bins: int = 100,
+        distributions: list[str] | str | None = None,
+        timeout: int = 30,
+        density: bool = True,
+    ) -> None:
         """.. rubric:: Constructor
 
         :param list data: a numpy array or a list
@@ -270,55 +228,67 @@ class Fitter:
         self._density = True
 
         #: list of distributions to test
-        self.distributions = distributions
-        if self.distributions is None:
+        self.distributions: list[str]
+        if distributions is None:
             self._load_all_distributions()
-        elif self.distributions == "common":
+        elif distributions == "common":
             self.distributions = get_common_distributions()
         elif isinstance(distributions, str):
             self.distributions = [distributions]
+        else:
+            self.distributions = distributions
 
         self.bins = bins
 
-        self._alldata = np.array(data)
-        if xmin is None:
-            self._xmin = self._alldata.min()
-        else:
-            self._xmin = xmin
-        if xmax is None:
-            self._xmax = self._alldata.max()
-        else:
-            self._xmax = xmax
+        self._alldata: np.ndarray = np.asarray(data)
+        # Use ternary for cleaner code
+        self._xmin: float = self._alldata.min() if xmin is None else xmin
+        self._xmax: float = self._alldata.max() if xmax is None else xmax
 
         self._trim_data()
         self._update_data_pdf()
 
-        self._init() # Other attributes
+        # Other attributes
+        self._init()
 
-    def _init(self):
-        self.fitted_param = {}
-        self.fitted_pdf = {}
-        self._fitted_errors = {}
-        self._aic = {}
-        self._bic = {}
-        self._kldiv = {}
-        self._ks_stat = {}
-        self._ks_pval = {}
-        self._fit_i = 0  # fit progress
-        # self.pb = None
+    def _init(self) -> None:
+        """Initialize result storage dictionaries."""
+        self.fitted_param: dict[str, tuple] = {}
+        self.fitted_pdf: dict[str, np.ndarray] = {}
+        self._fitted_errors: dict[str, float] = {}
+        self._aic: dict[str, float] = {}
+        self._bic: dict[str, float] = {}
+        self._kldiv: dict[str, float] = {}
+        self._ks_stat: dict[str, float] = {}
+        self._ks_pval: dict[str, float] = {}
+        self._fit_i: int = 0  # fit progress
 
-    def _update_data_pdf(self):
-        # histogram retuns X with N+1 values. So, we rearrange the X output into only N
-        self.y, self.x = np.histogram(self._data, bins=self.bins, density=self._density)
-        self.x = [(this + self.x[i + 1]) / 2.0 for i, this in enumerate(self.x[0:-1])]
+    def _update_data_pdf(self) -> None:
+        """Compute histogram of data and convert bin edges to bin centers.
 
-    def _trim_data(self):
-        self._data = self._alldata[np.logical_and(self._alldata >= self._xmin, self._alldata <= self._xmax)]
+        Note:
+            np.histogram returns N+1 bin edges for N bins. We convert to N bin centers.
 
-    def _get_xmin(self):
+        """
+        self.y: np.ndarray
+        self.x: np.ndarray
+        self.y, bin_edges = np.histogram(self._data, bins=self.bins, density=self._density)
+        # OPTIMIZATION: Vectorized bin center calculation (much faster than list comprehension)
+        self.x = (bin_edges[:-1] + bin_edges[1:]) / 2.0
+
+    def _trim_data(self) -> None:
+        """Filter data to be within [xmin, xmax] range."""
+        # Vectorized boolean indexing (efficient)
+        self._data: np.ndarray = self._alldata[
+            (self._alldata >= self._xmin) & (self._alldata <= self._xmax)
+        ]
+
+    def _get_xmin(self) -> float:
+        """Get the minimum x value for data filtering."""
         return self._xmin
 
-    def _set_xmin(self, value):
+    def _set_xmin(self, value: float | None) -> None:
+        """Set the minimum x value for data filtering."""
         if value is None or value < self._alldata.min():
             value = self._alldata.min()
         self._xmin = value
@@ -327,102 +297,172 @@ class Fitter:
 
     xmin = property(_get_xmin, _set_xmin, doc="consider only data above xmin. reset if None")
 
-    def _get_xmax(self):
+    def _get_xmax(self) -> float:
+        """Get the maximum x value for data filtering."""
         return self._xmax
 
-    def _set_xmax(self, value):
+    def _set_xmax(self, value: float | None) -> None:
+        """Set the maximum x value for data filtering."""
         if value is None or value > self._alldata.max():
             value = self._alldata.max()
         self._xmax = value
         self._trim_data()
         self._update_data_pdf()
 
-    xmax = property(_get_xmax, _set_xmax, doc="consider only data below xmax. reset if None ")
+    xmax = property(_get_xmax, _set_xmax, doc="consider only data below xmax. reset if None")
 
-    def _load_all_distributions(self):
-        """Replace the :attr:`distributions` attribute with all scipy distributions"""
+    def _load_all_distributions(self) -> None:
+        """Replace the :attr:`distributions` attribute with all scipy distributions."""
         self.distributions = get_distributions()
 
-    def hist(self):
-        """Draw normed histogram of the data using :attr:`bins`
+    def hist(self) -> None:
+        """Draw normalized histogram of the data using :attr:`bins`.
 
-        .. plot::
-
+        Examples:
             >>> from scipy import stats
             >>> data = stats.gamma.rvs(2, loc=1.5, scale=2, size=20000)
-            >>> # We then create the Fitter object
             >>> import fitter
             >>> fitter.Fitter(data).hist()
 
         """
-        _ = pylab.hist(self._data, bins=self.bins, density=self._density)
-        pylab.grid(True)
+        plt.hist(self._data, bins=self.bins, density=self._density)
+        plt.grid(True)
 
     @staticmethod
-    def _fit_single_distribution(distribution, data, x, y, timeout):
+    def _fit_single_distribution(
+        distribution: str,
+        data: np.ndarray,
+        x: np.ndarray,
+        y: np.ndarray,
+        timeout: int,
+    ) -> tuple[str, tuple | None]:
+        """Fit a single distribution to data and compute goodness-of-fit metrics.
+
+        Args:
+            distribution: Name of the scipy.stats distribution to fit.
+            data: Raw data array to fit.
+            x: Bin centers for histogram comparison.
+            y: Histogram density values.
+            timeout: Maximum time allowed for fitting (seconds).
+
+        Returns:
+            Tuple of (distribution_name, results_tuple) where results_tuple contains
+            (params, pdf_fitted, sq_error, aic, bic, kl_div, ks_stat, ks_pval)
+            or None if fitting failed.
+
+        """
         import warnings
 
         warnings.filterwarnings("ignore", category=RuntimeWarning)
         try:
-            # need a subprocess to check time it takes. If too long, skip it
-            dist = eval("scipy.stats." + distribution)
+            # BUGFIX: Replace eval() with getattr() - safer and faster
+            dist = getattr(scipy.stats, distribution)
 
             param = Fitter._with_timeout(dist.fit, args=(data,), timeout=timeout)
 
-            # with signal, does not work. maybe because another expection is caught
-            # hoping the order returned by fit is the same as in pdf
+            # Compute PDF at bin centers for visualization
             pdf_fitted = dist.pdf(x, *param)
 
-            # calculate error
+            # Calculate sum of squared errors between fitted PDF and histogram
             sq_error = np.sum((pdf_fitted - y) ** 2)
 
-            # calculate information criteria
-            logLik = np.sum(dist.logpdf(x, *param))
-            k = len(param[:])
-            n = len(data)
+            # CRITICAL BUGFIX: logLik should be computed on DATA, not bin centers
+            # Original used x (bins) which gives wrong likelihood
+            logLik = np.sum(dist.logpdf(data, *param))
+            k = len(param)  # Number of parameters
+            n = len(data)   # Number of data points
+            
+            # Akaike Information Criterion: AIC = 2k - 2*ln(L)
             aic = 2 * k - 2 * logLik
 
-            # special case of gaussian distribution
-            # bic = n * np.log(sq_error / n) + k * np.log(n)
-            # general case:
+            # Bayesian Information Criterion: BIC = k*ln(n) - 2*ln(L)
             bic = k * np.log(n) - 2 * logLik
 
-            # calculate kullback leibler divergence
-            kullback_leibler = kl_div(pdf_fitted, y)
+            # Calculate Kullback-Leibler divergence (requires positive values)
+            # Add small epsilon to avoid log(0) issues
+            eps = 1e-10
+            kullback_leibler = kl_div(pdf_fitted + eps, y + eps)
 
-            # calculate goodness-of-fit statistic
+            # Calculate Kolmogorov-Smirnov goodness-of-fit statistic
+            # Create frozen distribution for efficient CDF evaluation
             dist_fitted = dist(*param)
             ks_stat, ks_pval = kstest(data, dist_fitted.cdf)
 
-            logger.info(f"Fitted {distribution} distribution with error={round(sq_error, 6)})")
+            logger.info(
+                f"Fitted {distribution}: error={sq_error:.6f}, "
+                f"AIC={aic:.2f}, KS={ks_stat:.4f}"
+            )
 
-            return distribution, (param, pdf_fitted, sq_error, aic, bic, kullback_leibler, ks_stat, ks_pval)
-        except Exception:  # pragma: no cover
-            logger.warning(f"SKIPPED {distribution} distribution (taking more than {timeout} seconds)")
-
+            return distribution, (
+                param,
+                pdf_fitted,
+                sq_error,
+                aic,
+                bic,
+                kullback_leibler,
+                ks_stat,
+                ks_pval,
+            )
+        except Exception as e:  # pragma: no cover
+            logger.warning(
+                f"SKIPPED {distribution}: {type(e).__name__} "
+                f"(timeout={timeout}s or fitting failed)"
+            )
             return distribution, None
 
-    def fit(self, progress=False, n_jobs=-1, max_workers=-1, prefer="processes"):
-        r"""Loop over distributions and find best parameter to fit the data for each
+    def fit(
+        self,
+        progress: bool = False,
+        n_jobs: int = -1,
+        max_workers: int = -1,
+        prefer: str = "processes",
+    ) -> None:
+        r"""Fit all distributions to the data and compute goodness-of-fit metrics.
 
-        When a distribution is fitted onto the data, we populate a set of
-        dataframes:
+        Loops over all distributions in parallel and finds the best parameters to fit
+        the data. Populates the following attributes:
 
-            - :attr:`df_errors`  :sum of the square errors between the data and the fitted
-              distribution i.e., :math:`\sum_i \left( Y_i - pdf(X_i) \right)^2`
-            - :attr:`fitted_param` : the parameters that best fit the data
-            - :attr:`fitted_pdf` : the PDF generated with the parameters that best fit the data
+            - :attr:`df_errors`: DataFrame with sum of squared errors and information criteria
+            - :attr:`fitted_param`: Parameters that best fit the data for each distribution
+            - :attr:`fitted_pdf`: PDF values generated with the fitted parameters
 
-        Indices of the dataframes contains the name of the distribution.
+        Args:
+            progress: If True, display progress bar during fitting.
+            n_jobs: Number of jobs for parallel processing (deprecated, use max_workers).
+            max_workers: Number of parallel workers (-1 for all CPUs).
+            prefer: Joblib parallelization method ('processes' or 'threads').
+
+        Note:
+            The fitting uses parallel processing for speed. Distributions that fail
+            or timeout are assigned infinite error values.
 
         """
-        N = len(self.distributions)
-        with tqdm_joblib(desc=f"Fitting {N} distributions", total=N, disable=not progress) as progress_bar:
-            results = Parallel(n_jobs=max_workers, prefer=prefer)(delayed(Fitter._fit_single_distribution)(dist, self._data, self.x, self.y, self.timeout) for dist in self.distributions)
+        n_dists = len(self.distributions)
+        with tqdm_joblib(
+            desc=f"Fitting {n_dists} distributions",
+            total=n_dists,
+            disable=not progress,
+        ) as progress_bar:
+            results = Parallel(n_jobs=max_workers, prefer=prefer)(
+                delayed(Fitter._fit_single_distribution)(
+                    dist, self._data, self.x, self.y, self.timeout
+                )
+                for dist in self.distributions
+            )
 
+        # Process results and populate dictionaries
         for distribution, values in results:
             if values is not None:
-                param, pdf_fitted, sq_error, aic, bic, kullback_leibler, ks_stat, ks_pval = values
+                (
+                    param,
+                    pdf_fitted,
+                    sq_error,
+                    aic,
+                    bic,
+                    kullback_leibler,
+                    ks_stat,
+                    ks_pval,
+                ) = values
 
                 self.fitted_param[distribution] = param
                 self.fitted_pdf[distribution] = pdf_fitted
@@ -433,12 +473,16 @@ class Fitter:
                 self._ks_stat[distribution] = ks_stat
                 self._ks_pval[distribution] = ks_pval
             else:
+                # Assign infinity for failed fits
                 self._fitted_errors[distribution] = np.inf
                 self._aic[distribution] = np.inf
                 self._bic[distribution] = np.inf
                 self._kldiv[distribution] = np.inf
+                self._ks_stat[distribution] = np.inf
+                self._ks_pval[distribution] = 0.0
 
-        self.df_errors = pd.DataFrame(
+        # Create results DataFrame
+        self.df_errors: pd.DataFrame = pd.DataFrame(
             {
                 "sumsquare_error": self._fitted_errors,
                 "aic": self._aic,
@@ -446,78 +490,145 @@ class Fitter:
                 "kl_div": self._kldiv,
                 "ks_statistic": self._ks_stat,
                 "ks_pvalue": self._ks_pval,
-            },
+            }
         )
         self.df_errors.sort_index(inplace=True)
 
-    def plot_pdf(self, names=None, Nbest=5, lw=2, method="sumsquare_error"):
-        """Plots Probability density functions of the distributions
+    def plot_pdf(
+        self,
+        names: str | list[str] | None = None,
+        Nbest: int = 5,
+        lw: float = 2,
+        method: str = "sumsquare_error",
+    ) -> None:
+        """Plot probability density functions of fitted distributions.
 
-        :param str,list names: names can be a single distribution name, or a list
-            of distribution names, or kept as None, in which case, the first Nbest
-            distribution will be taken (default to best 5)
-
+        Args:
+            names: Distribution name(s) to plot. If None, plots the Nbest distributions.
+                   Can be a single string or list of strings.
+            Nbest: Number of best-fitting distributions to plot (when names is None).
+            lw: Line width for the plots.
+            method: Metric to use for ranking distributions ('sumsquare_error', 'aic', 'bic', etc.).
 
         """
-        assert Nbest > 0
+        assert Nbest > 0, "Nbest must be positive"
         Nbest = min(Nbest, len(self.distributions))
 
         if isinstance(names, list):
             for name in names:
-                pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+                if name in self.fitted_pdf:
+                    plt.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+                else:
+                    logger.warning(f"{name} was not fitted successfully")
         elif names:
-            pylab.plot(self.x, self.fitted_pdf[names], lw=lw, label=names)
+            if names in self.fitted_pdf:
+                plt.plot(self.x, self.fitted_pdf[names], lw=lw, label=names)
+            else:
+                logger.warning(f"{names} was not fitted successfully")
         else:
+            # Get best N distributions by specified method
             try:
-                names = self.df_errors.sort_values(by=method).index[0:Nbest]
+                best_names = self.df_errors.sort_values(by=method).index[:Nbest]
             except Exception:
-                names = self.df_errors.sort(method).index[0:Nbest]
+                # Fallback for older pandas versions
+                best_names = self.df_errors.sort_values(method).index[:Nbest]
 
-            for name in names:
-                if name in self.fitted_pdf.keys():
-                    pylab.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
+            for name in best_names:
+                if name in self.fitted_pdf:
+                    plt.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
                 else:  # pragma: no cover
-                    logger.warning(f"{name} was not fitted. no parameters available")
-        pylab.grid(True)
-        pylab.legend()
+                    logger.warning(f"{name} was not fitted. No parameters available")
+        
+        plt.grid(True)
+        plt.legend()
 
-    def get_best(self, method="sumsquare_error"):
-        """Return best fitted distribution and its parameters
+    def get_best(self, method: str = "sumsquare_error") -> dict[str, dict[str, float]]:
+        """Return the best fitted distribution and its parameters.
 
-        a dictionary with one key (the distribution name) and its parameters
+        Args:
+            method: Metric to use for ranking ('sumsquare_error', 'aic', 'bic', etc.).
+
+        Returns:
+            Dictionary with distribution name as key and parameter dictionary as value.
+            Example: {'gamma': {'a': 2.0, 'loc': 1.5, 'scale': 2.0}}
 
         """
-        # self.df should be sorted, so then us take the first one as the best
-        name = self.df_errors.sort_values(method).iloc[0].name
-        params = self.fitted_param[name]
-        distribution = getattr(scipy.stats, name)
-        param_names = (distribution.shapes + ", loc, scale").split(", ") if distribution.shapes else ["loc", "scale"]
+        # Get best distribution (lowest error/AIC/BIC)
+        best_name = self.df_errors.sort_values(method).iloc[0].name
+        params = self.fitted_param[best_name]
+        distribution = getattr(scipy.stats, best_name)
+        
+        # Extract parameter names from distribution
+        if distribution.shapes:
+            param_names = (distribution.shapes + ", loc, scale").split(", ")
+        else:
+            param_names = ["loc", "scale"]
 
-        param_dict = {}
-        for d_key, d_val in zip(param_names, params, strict=False):
-            param_dict[d_key] = d_val
-        return {name: param_dict}
+        # Create parameter dictionary using dict comprehension (faster)
+        param_dict = dict(zip(param_names, params))
+        return {best_name: param_dict}
 
-    def summary(self, Nbest=5, lw=2, plot=True, method="sumsquare_error", clf=True):
-        """Plots the distribution of the data and N best distributions"""
+    def summary(
+        self,
+        Nbest: int = 5,
+        lw: float = 2,
+        plot: bool = True,
+        method: str = "sumsquare_error",
+        clf: bool = True,
+    ) -> pd.DataFrame:
+        """Display summary of best fitting distributions.
+
+        Args:
+            Nbest: Number of best distributions to include in summary.
+            lw: Line width for plots.
+            plot: If True, create histogram and PDF overlay plot.
+            method: Metric to use for ranking distributions.
+            clf: If True, clear figure before plotting.
+
+        Returns:
+            DataFrame with fitting results for the Nbest distributions.
+
+        """
         if plot:
             if clf:
-                pylab.clf()
+                plt.clf()
             self.hist()
             self.plot_pdf(Nbest=Nbest, lw=lw, method=method)
-            pylab.grid(True)
+            plt.grid(True)
 
         Nbest = min(Nbest, len(self.distributions))
         try:
-            names = self.df_errors.sort_values(by=method).index[0:Nbest]
-        except:  # pragma: no cover
-            names = self.df_errors.sort(method).index[0:Nbest]
-        return self.df_errors.loc[names]
+            best_names = self.df_errors.sort_values(by=method).index[:Nbest]
+        except Exception:  # pragma: no cover
+            # Fallback for older pandas versions
+            best_names = self.df_errors.sort_values(method).index[:Nbest]
+        return self.df_errors.loc[best_names]
 
     @staticmethod
-    def _with_timeout(func, args=(), kwargs={}, timeout=30):
-        n_workers = multiprocessing.cpu_count() # Get number of available cores instead of hardcoding to 1
-        with multiprocessing.pool.ThreadPool(n_workers) as pool:
+    def _with_timeout(
+        func: Any,
+        args: tuple = (),
+        kwargs: dict[str, Any] | None = None,
+        timeout: int = 30,
+    ) -> Any:
+        """Execute a function with a timeout limit.
+
+        Args:
+            func: Function to execute.
+            args: Positional arguments for the function.
+            kwargs: Keyword arguments for the function.
+            timeout: Maximum execution time in seconds.
+
+        Returns:
+            Result of the function call.
+
+        Raises:
+            TimeoutError: If function execution exceeds timeout.
+
+        """
+        if kwargs is None:
+            kwargs = {}
+        with multiprocessing.pool.ThreadPool(1) as pool:
             async_result = pool.apply_async(func, args, kwargs)
             return async_result.get(timeout=timeout)
 

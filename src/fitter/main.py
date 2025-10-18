@@ -14,38 +14,53 @@
 #  Package: http://pypi.python.org/fitter
 #
 ##############################################################################
-""".. rubric:: Standalone application"""
+"""Standalone application for fitting distributions to data.
+
+This module provides a CLI interface for the fitter package,
+allowing users to fit various statistical distributions to their data.
+"""
+
+from __future__ import annotations
 
 import csv
 import sys
 from pathlib import Path
+from typing import Any
 
 import rich_click as click
 
-__all__ = ["main"]
-
 from fitter import version
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+__all__ = ["main"]
 
+# Module-level constants
+CONTEXT_SETTINGS: dict[str, Any] = {"help_option_names": ["-h", "--help"]}
+VALID_IMAGE_EXTENSIONS: frozenset[str] = frozenset({"png", "jpg", "svg", "pdf"})
 
+# Configure rich_click settings
 click.rich_click.USE_MARKDOWN = True
 click.rich_click.SHOW_METAVARS_COLUMN = False
 click.rich_click.APPEND_METAVARS_HELP = True
 click.rich_click.STYLE_ERRORS_SUGGESTION = "magenta italic"
 click.rich_click.SHOW_ARGUMENTS = True
-click.rich_click.FOOTER_TEXT = "Authors: Thomas Cokelaer -- Documentation: http://fitter.readthedocs.io -- Issues: http://github.com/cokelaer/fitter"
+click.rich_click.FOOTER_TEXT = (
+    "Authors: Thomas Cokelaer -- "
+    "Documentation: http://fitter.readthedocs.io -- "
+    "Issues: http://github.com/cokelaer/fitter"
+)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=version)
-def main():  # pragma: no cover
-    """Fitter can fit your data using Scipy distributions
+def main() -> None:  # pragma: no cover
+    """Fit your data using SciPy distributions.
 
-    Example:
+    Examples:
         fitter fitdist data.csv
+        fitter show_distributions
 
     """
+    pass
 
 
 @main.command()
@@ -55,80 +70,174 @@ def main():  # pragma: no cover
     type=click.INT,
     default=1,
     show_default=True,
-    help="data column to use (first column by default)",
+    help="Data column to use (1-indexed, first column by default)",
 )
 @click.option(
     "--delimiter",
     type=click.STRING,
     default=",",
     show_default=True,
-    help="column delimiter (comma by default)",
+    help="Column delimiter (comma by default)",
 )
 @click.option(
     "--distributions",
     type=click.STRING,
     default="gamma,beta",
     show_default=True,
-    help="list of distribution",
+    help="Comma-separated list of distributions to fit",
 )
-@click.option("--tag", type=click.STRING, default="fitter", help="tag to name output files")
-@click.option("--progress/--no-progress", default=True, show_default=True)
-@click.option("--verbose/--no-verbose", default=True, show_default=True)
-@click.option("--output-image", type=click.STRING, default="fitter.png", show_default=True)
-def fitdist(**kwargs):
-    """Fit distribution"""
-    from pylab import savefig
+@click.option(
+    "--tag",
+    type=click.STRING,
+    default="fitter",
+    show_default=True,
+    help="Tag to name output files",
+)
+@click.option(
+    "--progress/--no-progress",
+    default=True,
+    show_default=True,
+    help="Show progress bar during fitting",
+)
+@click.option(
+    "--verbose/--no-verbose",
+    default=True,
+    show_default=True,
+    help="Enable verbose output",
+)
+@click.option(
+    "--output-image",
+    type=click.STRING,
+    default="fitter.png",
+    show_default=True,
+    help="Output image filename (png, jpg, svg, or pdf)",
+)
+def fitdist(**kwargs: Any) -> None:
+    """Fit statistical distributions to data from a CSV file.
 
+    Args:
+        **kwargs: Command-line arguments including filename, column_number,
+                  delimiter, distributions, tag, progress, verbose, and output_image.
+
+    Raises:
+        FileNotFoundError: If the input file does not exist.
+        ValueError: If the output file extension is invalid.
+        IndexError: If the specified column doesn't exist.
+        ValueError: If data cannot be converted to float.
+
+    """
+    from matplotlib.pyplot import savefig  # Lazy import for performance
+
+    filename = Path(kwargs["filename"])
+    
+    # Validate input file exists
+    if not filename.exists():
+        click.echo(f"Error: File '{filename}' not found.", err=True)
+        sys.exit(1)
+    
     col = kwargs["column_number"]
-    with open(kwargs["filename"]) as csvfile:
-        data = csv.reader(csvfile, delimiter=kwargs["delimiter"])
-        data = [float(x[col - 1]) for x in data]
-
-    # check output extension
-    outfile = kwargs["output_image"]
-    if Path(outfile).name.split(".")[-1] not in ["png", "jpg", "svg", "pdf"]:
-        click.echo("output file must have one of the following extension: png, svg, pdf, jpg", err=True)
+    delimiter = kwargs["delimiter"]
+    
+    # Read CSV data - optimized with buffered reading
+    try:
+        with filename.open("r", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile, delimiter=delimiter)
+            # Pre-allocate list for better performance
+            data = []
+            for row in reader:
+                try:
+                    data.append(float(row[col - 1]))
+                except (IndexError, ValueError) as e:
+                    if isinstance(e, IndexError):
+                        click.echo(
+                            f"Error: Column {col} does not exist in the data.",
+                            err=True,
+                        )
+                    else:
+                        click.echo(
+                            f"Error: Cannot convert value to float in column {col}.",
+                            err=True,
+                        )
+                    sys.exit(1)
+    except OSError as e:
+        click.echo(f"Error reading file: {e}", err=True)
         sys.exit(1)
 
-    if kwargs["verbose"] is False:
-        kwargs["progress"] = False
+    # Validate output extension - use pathlib for robust path handling
+    outfile = Path(kwargs["output_image"])
+    if outfile.suffix.lstrip(".") not in VALID_IMAGE_EXTENSIONS:
+        extensions = ", ".join(sorted(VALID_IMAGE_EXTENSIONS))
+        click.echo(
+            f"Error: Output file must have one of these extensions: {extensions}",
+            err=True,
+        )
+        sys.exit(1)
 
-    # actual computation
+    # Disable progress bar if verbose is off
+    verbose = kwargs["verbose"]
+    progress = kwargs["progress"] and verbose
+
+    # Perform distribution fitting - lazy import for startup performance
     from fitter import Fitter
 
-    distributions = kwargs["distributions"].split(",")
-    distributions = [x.strip() for x in distributions]
+    # Parse and clean distribution names - single pass for efficiency
+    distributions = [d.strip() for d in kwargs["distributions"].split(",") if d.strip()]
+    
+    if not distributions:
+        click.echo("Error: No distributions specified.", err=True)
+        sys.exit(1)
+    
     fit = Fitter(data, distributions=distributions)
-    fit.fit(progress=kwargs["progress"])
+    fit.fit(progress=progress)
     fit.summary()
 
-    if kwargs["verbose"]:
+    if verbose:
         click.echo()
 
-    # save image
-    if kwargs["verbose"]:
-        click.echo("Saved image in fitter.png; use --output-image to change the name")
-    savefig(f"{outfile}", dpi=200)
+    # Save output image
+    if verbose:
+        click.echo(f"Saved image in {outfile}; use --output-image to change the name")
+    savefig(outfile, dpi=200)  # Use Path object directly
 
-    # additional info in the log file
+    # Extract best fit results - avoid multiple list() conversions
     best = fit.get_best()
-    bestname = list(best.keys())[0]
-    values = list(best.values())[0]
-    msg = f"Fitter version {version}\nBest fit is {bestname} distribution\nparameters: "
-    msg += f"{values}\n The parameters have to be used in that order in scipy"
-    if kwargs["verbose"]:
+    bestname, values = next(iter(best.items()))  # More efficient than list conversion
+    
+    # Build summary message using list join (faster than string concatenation)
+    msg_parts = [
+        f"Fitter version {version}",
+        f"Best fit is {bestname} distribution",
+        f"parameters: {values}",
+        "The parameters must be used in this order in scipy",
+    ]
+    msg = "\n".join(msg_parts)
+    
+    if verbose:
         click.echo(msg)
 
+    # Write log file - use pathlib and explicit encoding
     tag = kwargs["tag"]
-    with open(f"{tag}.log", "w") as fout:
-        fout.write(msg)
+    log_path = Path(f"{tag}.log")
+    try:
+        log_path.write_text(msg, encoding="utf-8")
+    except OSError as e:
+        click.echo(f"Warning: Could not write log file: {e}", err=True)
 
 
 @main.command()
-def show_distributions(**kwargs):
-    from fitter import get_distributions
+def show_distributions(**kwargs: Any) -> None:
+    """Display all available distributions.
 
-    click.echo("\n".join(get_distributions()))
+    Lists all statistical distributions that can be used for fitting.
+
+    Args:
+        **kwargs: Command-line arguments (unused but required by Click).
+
+    """
+    from fitter import get_distributions  # Lazy import
+
+    distributions = get_distributions()
+    click.echo("\n".join(distributions))
 
 
 if __name__ == "__main__":  # pragma: no cover

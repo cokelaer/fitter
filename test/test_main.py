@@ -12,8 +12,7 @@ def setup_teardown():
     data1 = stats.gamma.rvs(2, loc=1.5, scale=2, size=10000)
     data2 = stats.gamma.rvs(1, loc=1.5, scale=3, size=10000)
     with open("test.csv", "w") as tmp:
-        for x, y in zip(data1, data2, strict=False):
-            tmp.write(f"{x},{y}\n")
+        tmp.writelines(f"{x},{y}\n" for x, y in zip(data1, data2))
 
     # hand over control to test
     yield

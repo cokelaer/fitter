@@ -107,3 +107,41 @@ def test_verbose():
     # Both modes should produce identical fit results
     assert set(f_verbose.fitted_param.keys()) == set(f_silent.fitted_param.keys())
     assert set(f_verbose.fitted_pdf.keys()) == set(f_silent.fitted_pdf.keys())
+
+
+def test_cdf_bounds_validation():
+    """Test that distributions with CDF values outside [0, 1] are skipped.
+
+    Regression test for: geninvgauss can produce CDF > 1 for certain fitted
+    parameters, which indicates a numerically invalid fit and should be
+    excluded from results.
+    """
+    import scipy.stats
+
+    # These geninvgauss parameters are known to produce CDF > 1
+    params = (
+        0.48753085620446013,
+        5.181675881089951e-11,
+        0.00015499999999999997,
+        2.953504104288843e-14,
+    )
+    dist = scipy.stats.geninvgauss
+    # Confirm the known bad CDF value that triggered the issue (CDF at x=0.05 > 1)
+    assert dist.cdf(0.05, *params) > 1, "Test precondition: CDF should be > 1 for these params"
+
+    # Create a dataset using these problematic parameters; use fixed seed for reproducibility
+    data = dist.rvs(*params, size=200, random_state=42)
+
+    # Fit only geninvgauss and check the result
+    f = Fitter(data, distributions=["geninvgauss"])
+    f.fit()
+
+    # If geninvgauss was skipped due to invalid CDF, it won't be in fitted_param
+    # If it was fitted successfully, its CDF must be valid (within [0, 1])
+    if "geninvgauss" in f.fitted_param:
+        fitted_params = f.fitted_param["geninvgauss"]
+        fitted_dist = dist(*fitted_params)
+        import numpy as np
+        cdf_at_data = fitted_dist.cdf(data)
+        assert np.all(cdf_at_data <= 1), "Fitted geninvgauss CDF must not exceed 1"
+        assert np.all(cdf_at_data >= 0), "Fitted geninvgauss CDF must not be below 0"

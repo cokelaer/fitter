@@ -389,9 +389,22 @@ class Fitter:
             eps = 1e-10
             kullback_leibler = kl_div(pdf_fitted + eps, y + eps)
 
-            # Calculate Kolmogorov-Smirnov goodness-of-fit statistic
             # Create frozen distribution for efficient CDF evaluation
             dist_fitted = dist(*param)
+
+            # Validate that the CDF is bounded within [0, 1] over the data range.
+            # Some distributions (e.g. geninvgauss) can return CDF values slightly
+            # above 1 due to numerical issues, which indicates an invalid fit.
+            cdf_values = dist_fitted.cdf(x)
+            if np.any(cdf_values > 1) or np.any(cdf_values < 0):
+                if verbose:
+                    logger.warning(
+                        f"SKIPPED {distribution}: CDF values outside [0, 1] "
+                        f"(min={cdf_values.min():.6g}, max={cdf_values.max():.6g})"
+                    )
+                return distribution, None
+
+            # Calculate Kolmogorov-Smirnov goodness-of-fit statistic
             ks_stat, ks_pval = kstest(data, dist_fitted.cdf)
 
             if verbose:

@@ -1,5 +1,5 @@
 from importlib import metadata
-
+from loguru import logger
 
 def get_package_version(package_name):
     try:
@@ -14,3 +14,6 @@ version = get_package_version("fitter")
 
 from .fitter import Fitter, get_common_distributions, get_distributions
 from .histfit import HistFit
+
+# Disable default logging.
+logger.disable('fitter')

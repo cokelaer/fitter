@@ -193,6 +193,7 @@ class Fitter:
         distributions: list[str] | str | None = None,
         timeout: int = 30,
         density: bool = True,
+        verbose: bool = True,
     ) -> None:
         """.. rubric:: Constructor
 
@@ -211,10 +212,13 @@ class Fitter:
                  lognorm, norm, powerlaw, irayleigh, uniform.
         :param timeout: max time for a given distribution. If timeout is
             reached, the distribution is skipped.
+        :param bool verbose: if True (default), log fitting progress messages. Set to
+            False to suppress all informational output.
 
-        .. versionchanged:: 1.2.1 remove verbose argument, replacedb by logging module.
+        .. versionchanged:: 1.3.0 re-add verbose argument to allow suppressing log output.
         .. versionchanged:: 1.0.8 increase timeout from 10 to 30 seconds.
         """
+        self.verbose = verbose
         self.timeout = timeout
         # USER input
         self._data = None
@@ -335,6 +339,7 @@ class Fitter:
         x: np.ndarray,
         y: np.ndarray,
         timeout: int,
+        verbose: bool = True,
     ) -> tuple[str, tuple | None]:
         """Fit a single distribution to data and compute goodness-of-fit metrics.
 
@@ -344,6 +349,7 @@ class Fitter:
             x: Bin centers for histogram comparison.
             y: Histogram density values.
             timeout: Maximum time allowed for fitting (seconds).
+            verbose: If True, log fitting progress messages.
 
         Returns:
             Tuple of (distribution_name, results_tuple) where results_tuple contains
@@ -388,10 +394,11 @@ class Fitter:
             dist_fitted = dist(*param)
             ks_stat, ks_pval = kstest(data, dist_fitted.cdf)
 
-            logger.info(
-                f"Fitted {distribution}: error={sq_error:.6f}, "
-                f"AIC={aic:.2f}, KS={ks_stat:.4f}"
-            )
+            if verbose:
+                logger.info(
+                    f"Fitted {distribution}: error={sq_error:.6f}, "
+                    f"AIC={aic:.2f}, KS={ks_stat:.4f}"
+                )
 
             return distribution, (
                 param,
@@ -404,10 +411,11 @@ class Fitter:
                 ks_pval,
             )
         except Exception as e:  # pragma: no cover
-            logger.warning(
-                f"SKIPPED {distribution}: {type(e).__name__} "
-                f"(timeout={timeout}s or fitting failed)"
-            )
+            if verbose:
+                logger.warning(
+                    f"SKIPPED {distribution}: {type(e).__name__} "
+                    f"(timeout={timeout}s or fitting failed)"
+                )
             return distribution, None
 
     def fit(
@@ -445,7 +453,7 @@ class Fitter:
         ) as progress_bar:
             results = Parallel(n_jobs=max_workers, prefer=prefer)(
                 delayed(Fitter._fit_single_distribution)(
-                    dist, self._data, self.x, self.y, self.timeout
+                    dist, self._data, self.x, self.y, self.timeout, self.verbose
                 )
                 for dist in self.distributions
             )

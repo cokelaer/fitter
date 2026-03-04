@@ -72,3 +72,38 @@ def test_n_jobs_api():
     f = Fitter(data, distributions="common")
     f.fit(n_jobs=-1)
     f.fit(n_jobs=1)
+
+
+def test_verbose():
+    """Test that verbose=False suppresses log output without affecting fit results."""
+    from loguru import logger
+    from scipy import stats
+
+    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=1000)
+
+    # Capture log messages when verbose=True.
+    # Use prefer="threads" so logging happens in the same process and can be captured.
+    verbose_messages = []
+    handler_id = logger.add(lambda msg: verbose_messages.append(msg), level="INFO")
+    try:
+        f_verbose = Fitter(data, distributions=["gamma", "norm"], verbose=True)
+        f_verbose.fit(prefer="threads")
+    finally:
+        logger.remove(handler_id)
+
+    # Capture log messages when verbose=False (should be empty)
+    silent_messages = []
+    handler_id = logger.add(lambda msg: silent_messages.append(msg), level="INFO")
+    try:
+        f_silent = Fitter(data, distributions=["gamma", "norm"], verbose=False)
+        f_silent.fit(prefer="threads")
+    finally:
+        logger.remove(handler_id)
+
+    # verbose=True should log messages; verbose=False should log nothing
+    assert len(verbose_messages) > 0
+    assert len(silent_messages) == 0
+
+    # Both modes should produce identical fit results
+    assert set(f_verbose.fitted_param.keys()) == set(f_silent.fitted_param.keys())
+    assert set(f_verbose.fitted_pdf.keys()) == set(f_silent.fitted_pdf.keys())

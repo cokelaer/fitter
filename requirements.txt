@@ -1,0 +1,12 @@
+click>=8.3.0
+joblib>=1.5.2
+loguru>=0.7.3
+matplotlib>=3.10.7
+numpy>=2.3.4
+pandas>=2.3.3
+pytest>=8.4.2
+rich_click>=1.9.3
+scipy>=1.16.2
+setuptools>=80.9.0
+Sphinx>=8.2.3
+tqdm>=4.67.1

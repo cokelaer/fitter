@@ -1,0 +1,41 @@
+# black formatter takes care of the line length
+line-length = 999
+
+lint.select = ["ALL"]
+
+lint.ignore = [
+    "UP006", # https://github.com/charliermarsh/ruff/pull/4427
+    "UP007", # https://github.com/charliermarsh/ruff/pull/4427
+    # Mutable class attributes should be annotated with `typing.ClassVar`
+    # Too many violations
+    "RUF012",
+    # Logging statement uses f-string
+    "G004",
+    "T201", # flake8-print
+    "ERA001", # Commented out code
+    "W291", # trailing whitespace
+    "UP018" # native-literals (UP018).
+]
+
+# Mininal python version we support is 3.13
+target-version = "py313"
+
+[lint.per-file-ignores]
+# python scripts in bin/ needs some python path configurations before import
+"bin/*.py" = [
+    # E402: module-import-not-at-top-of-file
+    "E402",
+    # S603: `subprocess` call: check for execution of untrusted input
+    # these are dev tools and do not have risks of malicious inputs.
+    "S603",
+    # T201 `print` found
+    # print() is allowed in bin/ as they are dev tools.
+    "T201",
+]
+
+[lint.pylint]
+max-args = 6  # We have many functions reaching 6 args
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"

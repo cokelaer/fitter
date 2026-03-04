@@ -34,8 +34,8 @@ numpy = "^2.3.4"
 pandas = "^2.3.3"
 scipy = "^1.16.2"
 tqdm = "^4.67.1"
-loguru = "^0.7.3"
 rich-click = "^1.9.3"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"

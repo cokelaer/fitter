@@ -24,6 +24,7 @@ to data samples and comparing their goodness of fit using various metrics.
 from __future__ import annotations
 
 import contextlib
+import logging
 import multiprocessing
 from typing import Any
 
@@ -32,11 +33,12 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 from joblib.parallel import Parallel, delayed
-from loguru import logger
 from matplotlib import pyplot as plt
 from scipy.stats import entropy as kl_div
 from scipy.stats import kstest
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["Fitter", "get_common_distributions", "get_distributions"]
 

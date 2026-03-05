@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fitter"
-version = "1.7.1"
+version = "1.8.0"
 description = "A tool to fit data to many distributions and get the best one(s)"
 authors = ["Thomas Cokelaer <cokelaer@gmail.com>"]
 license = "GPL"
@@ -14,10 +14,11 @@ classifiers = [
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Information Analysis",
@@ -26,7 +27,7 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 click = "^8.3.0"
 joblib = "^1.5.2"
 matplotlib = "^3.10.7"

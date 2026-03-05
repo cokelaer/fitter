@@ -38,9 +38,9 @@ CONTEXT_SETTINGS: dict[str, Any] = {"help_option_names": ["-h", "--help"]}
 VALID_IMAGE_EXTENSIONS: frozenset[str] = frozenset({"png", "jpg", "svg", "pdf"})
 
 # Configure rich_click settings
-click.rich_click.USE_MARKDOWN = True
-click.rich_click.SHOW_METAVARS_COLUMN = False
-click.rich_click.APPEND_METAVARS_HELP = True
+click.rich_click.TEXT_MARKUP = "markdown"
+click.rich_click.OPTIONS_TABLE_COLUMN_TYPES = ["required", "opt_short", "opt_long", "help"]
+click.rich_click.OPTIONS_TABLE_HELP_SECTIONS = ["help", "deprecated", "envvar", "default", "required", "metavar"]
 click.rich_click.STYLE_ERRORS_SUGGESTION = "magenta italic"
 click.rich_click.SHOW_ARGUMENTS = True
 click.rich_click.FOOTER_TEXT = (

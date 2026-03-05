@@ -10,17 +10,26 @@ FITTER documentation
 .. image:: https://github.com/cokelaer/fitter/actions/workflows/main.yml/badge.svg?branch=main
     :target: https://github.com/cokelaer/fitter/actions/workflows/main.yml
 
-.. image:: https://coveralls.io/repos/cokelaer/fitter/badge.png?branch=main
-    :target: https://coveralls.io/r/cokelaer/fitter?branch=main
+.. image:: https://coveralls.io/repos/github/cokelaer/fitter/badge.svg?branch=main
+    :target: https://coveralls.io/github/cokelaer/fitter?branch=main
 
-.. image:: http://readthedocs.org/projects/fitter/badge/?version=latest
-    :target: http://fitter.readthedocs.org/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/fitter/badge/?version=latest
+    :target: https://fitter.readthedocs.org/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. image:: https://zenodo.org/badge/23078551.svg
    :target: https://zenodo.org/badge/latestdoi/23078551
 
-Compatible with Python 3.7, and 3.8, 3.9
+.. image:: https://img.shields.io/pypi/pyversions/fitter.svg
+    :target: https://pypi.python.org/pypi/fitter
+
+.. image:: https://img.shields.io/conda/vn/bioconda/fitter.svg
+    :target: https://bioconda.github.io/recipes/fitter/README.html
+
+.. image:: https://img.shields.io/pypi/l/fitter.svg
+    :target: https://pypi.python.org/pypi/fitter
+
+Compatible with Python 3.9, 3.10, 3.11, 3.12, 3.13
 
 
 What is it ?

@@ -34,6 +34,7 @@ import scipy.stats
 from joblib.parallel import Parallel, delayed
 from loguru import logger
 from matplotlib import pyplot as plt
+from scipy.integrate import IntegrationWarning
 from scipy.stats import entropy as kl_div
 from scipy.stats import kstest
 from tqdm import tqdm
@@ -83,10 +84,7 @@ def get_distributions() -> list[str]:
 
     """
     # BUGFIX: Replace eval() with getattr() - safer and faster
-    distributions = [
-        name for name in dir(scipy.stats)
-        if hasattr(getattr(scipy.stats, name, None), 'fit')
-    ]
+    distributions = [name for name in dir(scipy.stats) if hasattr(getattr(scipy.stats, name, None), "fit")]
     return distributions
 
 
@@ -283,9 +281,7 @@ class Fitter:
     def _trim_data(self) -> None:
         """Filter data to be within [xmin, xmax] range."""
         # Vectorized boolean indexing (efficient)
-        self._data: np.ndarray = self._alldata[
-            (self._alldata >= self._xmin) & (self._alldata <= self._xmax)
-        ]
+        self._data: np.ndarray = self._alldata[(self._alldata >= self._xmin) & (self._alldata <= self._xmax)]
 
     def _get_xmin(self) -> float:
         """Get the minimum x value for data filtering."""
@@ -360,6 +356,7 @@ class Fitter:
         import warnings
 
         warnings.filterwarnings("ignore", category=RuntimeWarning)
+        warnings.filterwarnings("ignore", category=IntegrationWarning)
         try:
             # BUGFIX: Replace eval() with getattr() - safer and faster
             dist = getattr(scipy.stats, distribution)
@@ -376,8 +373,8 @@ class Fitter:
             # Original used x (bins) which gives wrong likelihood
             logLik = np.sum(dist.logpdf(data, *param))
             k = len(param)  # Number of parameters
-            n = len(data)   # Number of data points
-            
+            n = len(data)  # Number of data points
+
             # Akaike Information Criterion: AIC = 2k - 2*ln(L)
             aic = 2 * k - 2 * logLik
 
@@ -408,10 +405,7 @@ class Fitter:
             ks_stat, ks_pval = kstest(data, dist_fitted.cdf)
 
             if verbose:
-                logger.info(
-                    f"Fitted {distribution}: error={sq_error:.6f}, "
-                    f"AIC={aic:.2f}, KS={ks_stat:.4f}"
-                )
+                logger.info(f"Fitted {distribution}: error={sq_error:.6f}, " f"AIC={aic:.2f}, KS={ks_stat:.4f}")
 
             return distribution, (
                 param,
@@ -425,10 +419,7 @@ class Fitter:
             )
         except Exception as e:  # pragma: no cover
             if verbose:
-                logger.warning(
-                    f"SKIPPED {distribution}: {type(e).__name__} "
-                    f"(timeout={timeout}s or fitting failed)"
-                )
+                logger.warning(f"SKIPPED {distribution}: {type(e).__name__} " f"(timeout={timeout}s or fitting failed)")
             return distribution, None
 
     def fit(
@@ -465,9 +456,7 @@ class Fitter:
             disable=not progress,
         ) as progress_bar:
             results = Parallel(n_jobs=max_workers, prefer=prefer)(
-                delayed(Fitter._fit_single_distribution)(
-                    dist, self._data, self.x, self.y, self.timeout, self.verbose
-                )
+                delayed(Fitter._fit_single_distribution)(dist, self._data, self.x, self.y, self.timeout, self.verbose)
                 for dist in self.distributions
             )
 
@@ -559,7 +548,7 @@ class Fitter:
                     plt.plot(self.x, self.fitted_pdf[name], lw=lw, label=name)
                 else:  # pragma: no cover
                     logger.warning(f"{name} was not fitted. No parameters available")
-        
+
         plt.grid(True)
         plt.legend()
 
@@ -578,7 +567,7 @@ class Fitter:
         best_name = self.df_errors.sort_values(method).iloc[0].name
         params = self.fitted_param[best_name]
         distribution = getattr(scipy.stats, best_name)
-        
+
         # Extract parameter names from distribution
         if distribution.shapes:
             param_names = (distribution.shapes + ", loc, scale").split(", ")

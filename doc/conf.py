@@ -15,13 +15,13 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import pkg_resources
+from importlib.metadata import version as get_version
 import sphinx
 
 # -- Project information -----------------------------------------------------
 
 
-version = pkg_resources.require("fitter")[0].version
+version = get_version("fitter")
 
 project = "fitter"
 copyright = "2019-2022, Thomas Cokelaer"

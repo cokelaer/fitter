@@ -19,9 +19,9 @@
 # -- Project information -----------------------------------------------------
 
 
-import pkg_resources
+from importlib.metadata import version as get_version
 
-version = pkg_resources.require("fitter")[0].version
+version = get_version("fitter")
 
 project = "fitter"
 copyright = "2019, Thomas Cokelaer"

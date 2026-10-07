@@ -108,6 +108,12 @@ Changelog
 ========= ==========================================================================
 Version   Description
 ========= ==========================================================================
+1.8.1     * fix ``ks_pvalue`` ranking: highest p-value is now the best fit
+          * raise ``ValueError`` when a distribution name is unknown
+          * back to standard ``logging`` (``fitter.fitter`` logger), loguru removed
+1.8.0     * add ``verbose`` option to ``Fitter`` to silence log output
+          * skip distributions whose CDF is outside [0, 1]
+          * update rich-click usage and set minimum Python version to 3.10
 1.7.1     * integrate PR github.com/cokelaer/fitter/pull/100 from @vitorandreazza
             to speedup multiprocessing run.
 1.7.0     * replace logging with loguru

@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "fitter"
-version = "1.8.0"
+version = "1.8.1"
 description = "A tool to fit data to many distributions and get the best one(s)"
 authors = [{name="Thomas Cokelaer", email="cokelaer@gmail.com"}]
 license = "GPL"

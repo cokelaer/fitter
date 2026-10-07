@@ -24,6 +24,7 @@ to data samples and comparing their goodness of fit using various metrics.
 from __future__ import annotations
 
 import contextlib
+import logging
 import multiprocessing
 from typing import Any
 
@@ -32,7 +33,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 from joblib.parallel import Parallel, delayed
-from loguru import logger
 from matplotlib import pyplot as plt
 from scipy.integrate import IntegrationWarning
 from scipy.stats import entropy as kl_div
@@ -40,6 +40,8 @@ from scipy.stats import kstest
 from tqdm import tqdm
 
 __all__ = ["Fitter", "get_common_distributions", "get_distributions"]
+
+logger = logging.getLogger(__name__)
 
 
 # A solution to wrap joblib parallel call in tqdm from
@@ -239,6 +241,7 @@ class Fitter:
             self.distributions = [distributions]
         else:
             self.distributions = distributions
+        self._check_distributions()
 
         self.bins = bins
 
@@ -252,6 +255,15 @@ class Fitter:
 
         # Other attributes
         self._init()
+
+    def _check_distributions(self) -> None:
+        """Raise ValueError if some requested distributions are not valid scipy.stats distributions."""
+        valid = set(get_distributions())
+        invalid = [name for name in self.distributions if name not in valid]
+        if invalid:
+            raise ValueError(
+                f"Unknown distribution(s): {invalid}. Use fitter.get_distributions() to list valid scipy.stats names."
+            )
 
     def _init(self) -> None:
         """Initialize result storage dictionaries."""
@@ -384,6 +396,9 @@ class Fitter:
             # Calculate Kullback-Leibler divergence (requires positive values)
             # Add small epsilon to avoid log(0) issues
             eps = 1e-10
+            # NOTE: scipy's entropy(pk, qk) computes KL(pk || qk), so this is KL(model || data),
+            # the reverse of the usual KL(data || model). Kept as is for backward compatibility
+            # of the reported "kl_div" values (see issue #27).
             kullback_leibler = kl_div(pdf_fitted + eps, y + eps)
 
             # Create frozen distribution for efficient CDF evaluation
@@ -537,11 +552,7 @@ class Fitter:
                 logger.warning(f"{names} was not fitted successfully")
         else:
             # Get best N distributions by specified method
-            try:
-                best_names = self.df_errors.sort_values(by=method).index[:Nbest]
-            except Exception:
-                # Fallback for older pandas versions
-                best_names = self.df_errors.sort_values(method).index[:Nbest]
+            best_names = self._sorted_names(method)[:Nbest]
 
             for name in best_names:
                 if name in self.fitted_pdf:
@@ -551,6 +562,14 @@ class Fitter:
 
         plt.grid(True)
         plt.legend()
+
+    def _sorted_names(self, method: str) -> pd.Index:
+        """Return distribution names ranked best first for the given metric.
+
+        Lower is better for all metrics except ``ks_pvalue``, where a higher p-value means the
+        data is more compatible with the fitted distribution.
+        """
+        return self.df_errors.sort_values(by=method, ascending=(method != "ks_pvalue")).index
 
     def get_best(self, method: str = "sumsquare_error") -> dict[str, dict[str, float]]:
         """Return the best fitted distribution and its parameters.
@@ -564,7 +583,7 @@ class Fitter:
 
         """
         # Get best distribution (lowest error/AIC/BIC)
-        best_name = self.df_errors.sort_values(method).iloc[0].name
+        best_name = self._sorted_names(method)[0]
         params = self.fitted_param[best_name]
         distribution = getattr(scipy.stats, best_name)
 
@@ -607,11 +626,7 @@ class Fitter:
             plt.grid(True)
 
         Nbest = min(Nbest, len(self.distributions))
-        try:
-            best_names = self.df_errors.sort_values(by=method).index[:Nbest]
-        except Exception:  # pragma: no cover
-            # Fallback for older pandas versions
-            best_names = self.df_errors.sort_values(method).index[:Nbest]
+        best_names = self._sorted_names(method)[:Nbest]
         return self.df_errors.loc[best_names]
 
     @staticmethod

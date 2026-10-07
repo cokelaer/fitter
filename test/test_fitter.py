@@ -74,31 +74,25 @@ def test_n_jobs_api():
     f.fit(n_jobs=1)
 
 
-def test_verbose():
+def test_verbose(caplog):
     """Test that verbose=False suppresses log output without affecting fit results."""
-    from loguru import logger
+    import logging
+
     from scipy import stats
 
     data = stats.gamma.rvs(2, loc=1.5, scale=2, size=1000)
 
-    # Capture log messages when verbose=True.
     # Use prefer="threads" so logging happens in the same process and can be captured.
-    verbose_messages = []
-    handler_id = logger.add(lambda msg: verbose_messages.append(msg), level="INFO")
-    try:
+    with caplog.at_level(logging.INFO, logger="fitter"):
         f_verbose = Fitter(data, distributions=["gamma", "norm"], verbose=True)
         f_verbose.fit(prefer="threads")
-    finally:
-        logger.remove(handler_id)
+    verbose_messages = list(caplog.records)
+    caplog.clear()
 
-    # Capture log messages when verbose=False (should be empty)
-    silent_messages = []
-    handler_id = logger.add(lambda msg: silent_messages.append(msg), level="INFO")
-    try:
+    with caplog.at_level(logging.INFO, logger="fitter"):
         f_silent = Fitter(data, distributions=["gamma", "norm"], verbose=False)
         f_silent.fit(prefer="threads")
-    finally:
-        logger.remove(handler_id)
+    silent_messages = list(caplog.records)
 
     # verbose=True should log messages; verbose=False should log nothing
     assert len(verbose_messages) > 0
@@ -142,6 +136,97 @@ def test_cdf_bounds_validation():
         fitted_params = f.fitted_param["geninvgauss"]
         fitted_dist = dist(*fitted_params)
         import numpy as np
+
         cdf_at_data = fitted_dist.cdf(data)
         assert np.all(cdf_at_data <= 1), "Fitted geninvgauss CDF must not exceed 1"
         assert np.all(cdf_at_data >= 0), "Fitted geninvgauss CDF must not be below 0"
+
+
+def test_unknown_distribution_raises():
+    import pytest
+
+    with pytest.raises(ValueError, match="normal"):
+        Fitter([1, 2, 3, 4, 5], distributions=["gamma", "normal"])
+
+
+def test_get_best_ks_pvalue_is_highest():
+    from scipy import stats
+
+    data = stats.gamma.rvs(2, loc=1.5, scale=2, size=1000)
+    f = Fitter(data, distributions=["gamma", "norm", "uniform"])
+    f.fit(prefer="threads")
+    best = next(iter(f.get_best(method="ks_pvalue")))
+    assert f.df_errors.loc[best, "ks_pvalue"] == f.df_errors["ks_pvalue"].max()
+    assert f.summary(plot=False, method="ks_pvalue").index[0] == best
+
+
+def _gamma_data(size=1000):
+    from scipy import stats
+
+    return stats.gamma.rvs(2, loc=1.5, scale=2, size=size)
+
+
+def test_plot_pdf_names():
+    import matplotlib
+
+    matplotlib.use("Agg")
+    f = Fitter(_gamma_data(), distributions=["gamma", "norm"])
+    f.fit(prefer="threads")
+    f.plot_pdf(names="gamma")
+    f.plot_pdf(names=["gamma", "norm"])
+    # unknown names only log a warning
+    f.plot_pdf(names="not_fitted")
+    f.plot_pdf(names=["gamma", "not_fitted"])
+    f.plot_pdf(Nbest=1, method="ks_pvalue")
+
+
+def test_get_best_without_shape_parameters():
+    f = Fitter(_gamma_data(), distributions=["norm"])
+    f.fit(prefer="threads")
+    best = f.get_best()
+    assert list(best) == ["norm"]
+    assert set(best["norm"]) == {"loc", "scale"}
+
+
+def test_failed_fit_gets_infinite_error(monkeypatch):
+    def fail(*args, **kwargs):
+        raise TimeoutError("too slow")
+
+    monkeypatch.setattr(Fitter, "_with_timeout", staticmethod(fail))
+    f = Fitter(_gamma_data(), distributions=["gamma"])
+    f.fit(prefer="threads")
+    assert f.fitted_param == {}
+    row = f.df_errors.loc["gamma"]
+    assert row["sumsquare_error"] == float("inf")
+    assert row["ks_pvalue"] == 0.0
+
+
+def test_invalid_cdf_is_skipped(monkeypatch):
+    import numpy as np
+    import scipy.stats
+
+    class Frozen:
+        def cdf(self, x):
+            return np.full_like(np.asarray(x, dtype=float), 2.0)
+
+    class BadDist:
+        @staticmethod
+        def fit(data):
+            return (0.0, 1.0)
+
+        @staticmethod
+        def pdf(x, *params):
+            return np.ones_like(x)
+
+        @staticmethod
+        def logpdf(x, *params):
+            return np.zeros_like(x)
+
+        def __new__(cls, *params):
+            return Frozen()
+
+    monkeypatch.setattr(scipy.stats, "bad_dist", BadDist, raising=False)
+    f = Fitter(_gamma_data(), distributions=["bad_dist"])
+    f.fit(prefer="threads")
+    assert "bad_dist" not in f.fitted_param
+    assert f.df_errors.loc["bad_dist", "sumsquare_error"] == float("inf")
